@@ -47,8 +47,8 @@ def convert(inPathName, outPathName):
 # Get path to video folder
 inputpath = sys.argv[1]
 path = os.path.abspath(os.path.join(inputpath, os.pardir))
-localFolder = "".join(inputpath[len(path):].split('/'))
-outputpath = path + "/" + localFolder + "_compressed/"
+localFolder = os.path.basename(os.path.dirname(inputpath))
+outputpath = os.path.join(path, localFolder + "_compressed")
 
 print("Copying structure from")
 print("  ", inputpath)
@@ -58,11 +58,14 @@ print("---------------------------------------")
 
 for dirpath, dirnames, filenames in os.walk(inputpath):
     # Get current relative path
-    relpath = dirpath[len(inputpath):]
-    print("Making directory:", outputpath+relpath)
+    relpath = os.path.relpath(dirpath, inputpath)
+    if relpath == ".":
+        relpath = ""
 
     # Make a new folder
     newfolderoutpath = os.path.join(outputpath, relpath)
+    print("Making directory:", newfolderoutpath)
+
     if not os.path.isdir(newfolderoutpath):
         os.mkdir(newfolderoutpath)
     else:
@@ -71,6 +74,9 @@ for dirpath, dirnames, filenames in os.walk(inputpath):
     # List all filenames in that folder
     for filename in filenames:
         if os.path.splitext(filename)[1] == ".avi":
-            inFilePathName = inputpath + relpath + "/" + filename
-            outFilePathName = outputpath + relpath + "/" + filename
-            convert(inFilePathName, outFilePathName)
+            inFilePathName = os.path.join(dirpath, filename)
+            outFilePathName = os.path.join(os.path.join(outputpath, relpath), filename)
+
+            print("converting file", inFilePathName, "to", outFilePathName)
+
+            # convert(inFilePathName, outFilePathName)
