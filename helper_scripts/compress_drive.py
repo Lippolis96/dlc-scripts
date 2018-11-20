@@ -47,7 +47,8 @@ def convert(inPathName, outPathName):
 # Get path to video folder
 inputpath = sys.argv[1]
 path = os.path.abspath(os.path.join(inputpath, os.pardir))
-localFolder = os.path.basename(os.path.dirname(inputpath))
+# localFolder = os.path.basename(os.path.dirname(inputpath))
+localFolder = os.path.basename(inputpath)
 outputpath = os.path.join(path, localFolder + "_compressed")
 
 print("Copying structure from")
@@ -64,12 +65,12 @@ for dirpath, dirnames, filenames in os.walk(inputpath):
 
     # Make a new folder
     newfolderoutpath = os.path.join(outputpath, relpath)
-    print("Making directory:", newfolderoutpath)
 
     if not os.path.isdir(newfolderoutpath):
+        print("Making directory:", newfolderoutpath)
         os.mkdir(newfolderoutpath)
     else:
-        print("-->Warning: Directory already exists!")
+        print("-->Warning: skipping existing directory", newfolderoutpath)
 
     # List all filenames in that folder
     for filename in filenames:
@@ -77,6 +78,9 @@ for dirpath, dirnames, filenames in os.walk(inputpath):
             inFilePathName = os.path.join(dirpath, filename)
             outFilePathName = os.path.join(os.path.join(outputpath, relpath), filename)
 
-            print("converting file", inFilePathName, "to", outFilePathName)
+            # print("converting file", inFilePathName, "to", outFilePathName)
 
-            # convert(inFilePathName, outFilePathName)
+            if os.path.isfile(outFilePathName):
+                print("--->Warning: skipping already existing file", outFilePathName)
+            else:
+                convert(inFilePathName, outFilePathName)
