@@ -1,0 +1,52 @@
+-----------------------
+Install-GPU:
+-----------------------
+1. Go to nvidia website and find out what is the newest stable version for your GPU
+  https://www.nvidia.com/Download/index.aspx
+2. Add nvidia repositories and install drivers from repository
+  sudo apt-get purge nvidia* 
+  sudo add-apt-repository ppa:graphics-drivers/ppa
+  sudo apt update
+  sudo apt install nvidia-410
+  sudo reboot
+3. Check that install worked
+  lsmod | grep nvidia
+  nvidia-smi
+4. Forbid auto-update to avoid black screen and other inconsistencies
+  sudo apt-mark hold nvidia-410
+
+-----------------------
+Install CUDA
+-----------------------
+1. Download and install CUDA using official website
+  https://developer.nvidia.com/cuda-downloads
+
+2. Verify
+  nvcc --version
+  run performace testing scripts in this repository
+  
+-----------------------
+Install-Docker:
+-----------------------
+1. Install Docker from repository
+  https://docs.docker.com/install/linux/docker-ce/ubuntu/
+2. Allow docker to be run without sudo
+  sudo groupadd docker
+  sudo usermod -aG docker $USER
+3. Add nvidia-docker repositories to Ubuntu
+  https://nvidia.github.io/nvidia-docker/
+4. Install nvidia-docker
+  sudo apt-get install nvidia-docker   - (Recommended by DLC)
+  sudo apt-get install nvidia-docker2  - (Newer one)
+5. Test that nvidia-docker works
+  nvidia-docker run --rm nvidia/cuda nvidia-smi
+6. Install DLC Docker
+  https://github.com/AlexEMG/Docker4DeepLabCut
+
+
+Problems:
+* "nvidia-docker" does not have installation candidate for Ubuntu 18.04, only 16.04
+* Running nvidia-docker test complains about missing path
+   - Reboot
+   - restart or kill docker service
+   - try another nvidia driver

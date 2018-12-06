@@ -1,4 +1,12 @@
 #############################
+# How to be nice to XRDP
+#############################
+
+# 1. Close session if you want session to continue running
+# 2. Log out from session if you want session to close
+# 3. Connect to XRDP using specific port to always use the same session
+
+#############################
 # How to Fix issues with XRDP
 #############################
 
