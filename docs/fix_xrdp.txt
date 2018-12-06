@@ -1,0 +1,24 @@
+#############################
+# How to Fix issues with XRDP
+#############################
+
+# Firstly, ssh to remote machine
+ssh username@machine_ip
+
+# Allow XRDP reconnect
+#   1. Edit the /etc/xrdp/xrdp.ini
+#   2. Find out the port of the desired session from below and use it to connect
+[xrdp1]
+name=reconnect-my-session
+lib=libvnc.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=ask
+
+# List all active XRDP sessions
+ps -ef | grep vnc 
+sudo lsof  -b -w -n -c /^Xvnc$/b -a -iTCP:5900-5999
+
+# Close all XRDP sessions
+sudo service xrdp restart
