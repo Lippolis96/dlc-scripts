@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1222</width>
-    <height>1024</height>
+    <width>980</width>
+    <height>939</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,54 +37,68 @@
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="1" column="2">
-               <widget class="QLabel" name="pathsNetworkVideoLabel">
-                <property name="text">
-                 <string>Video folder</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QPushButton" name="pathsLocalButton">
-                <property name="text">
-                 <string>Open</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QLineEdit" name="pathsNetworkVideoLineEdit"/>
               </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="pathsLocalLabel">
-                <property name="text">
-                 <string>Local project folder</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
+              <item row="1" column="1">
                <widget class="QLineEdit" name="pathsLocalLineEdit"/>
               </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pathsNetworkVideoButton">
-                <property name="text">
-                 <string>Open</string>
-                </property>
-               </widget>
+              <item row="4" column="1">
+               <widget class="QLineEdit" name="pathsImportLineEdit"/>
               </item>
-              <item row="2" column="0">
+              <item row="4" column="2">
                <widget class="QPushButton" name="pathsImportButton">
                 <property name="text">
                  <string>Open</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="pathsImportLineEdit"/>
+              <item row="1" column="0">
+               <widget class="QLabel" name="pathsLocalLabel">
+                <property name="text">
+                 <string>Local project folder</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pathsLocalButton">
+                <property name="text">
+                 <string>Open</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="pathsNetworkVideoLabel">
+                <property name="text">
+                 <string>Video folder</string>
+                </property>
+               </widget>
               </item>
               <item row="2" column="2">
+               <widget class="QPushButton" name="pathsNetworkVideoButton">
+                <property name="text">
+                 <string>Open</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
                <widget class="QLabel" name="pathsImportLabel">
                 <property name="text">
                  <string>Import project folder</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="pathsProjectNameLabel">
+                <property name="text">
+                 <string>New project name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="pathsProjectNameLineEdit">
+                <property name="text">
+                 <string>TrackingMyCatWhyNot14_43</string>
                 </property>
                </widget>
               </item>
@@ -116,148 +130,152 @@
            <attribute name="title">
             <string>params</string>
            </attribute>
-           <widget class="QWidget" name="gridLayoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>120</x>
-              <y>50</y>
-              <width>471</width>
-              <height>351</height>
-             </rect>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="3" column="0">
-              <widget class="QLabel" name="paramSelectionLabel">
-               <property name="text">
-                <string>Selection</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QComboBox" name="paramSelectionComboBox">
-               <item>
-                <property name="text">
-                 <string>uniform</string>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="3" column="0">
+                 <widget class="QLabel" name="paramSelectionLabel">
+                  <property name="text">
+                   <string>Selection</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QComboBox" name="paramSelectionComboBox">
+                  <item>
+                   <property name="text">
+                    <string>uniform</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>k-means</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="paramNameLabel">
+                  <property name="text">
+                   <string>Marker Name</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="paramDataLabel">
+                  <property name="text">
+                   <string>Date</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="paramNameLineEdit"/>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="paramDataLineEdit"/>
+                </item>
+                <item row="5" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <widget class="QLineEdit" name="paramCropMarginsXMin"/>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="paramCropMarginsXMax"/>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="paramCropMarginsYMin"/>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="paramCropMarginsYMax"/>
+                  </item>
+                 </layout>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="paramNumFrameLabel">
+                  <property name="text">
+                   <string>Num Frames</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="paramNumFrameLineEdit"/>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QCheckBox" name="paramCroppingCheckBox">
+                  <property name="text">
+                   <string>Cropping?</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="paramMarkingsLabel">
+                  <property name="text">
+                   <string>Markings</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QLineEdit" name="paramMarkingsLineEdit"/>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="paramMarginsLabel">
+                  <property name="text">
+                   <string>Crop margins</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_6">
+                <property name="leftMargin">
+                 <number>50</number>
                 </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>k-means</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="paramNameLabel">
-               <property name="text">
-                <string>Marker Name</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="paramDataLabel">
-               <property name="text">
-                <string>Date</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="paramNameLineEdit"/>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="paramDataLineEdit"/>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="paramMarginsLabel">
-               <property name="text">
-                <string>Crop margins</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <widget class="QLineEdit" name="paramCropMarginsXMin"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="paramCropMarginsXMax"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="paramCropMarginsYMin"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="paramCropMarginsYMax"/>
-               </item>
-              </layout>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="paramNumFrameLabel">
-               <property name="text">
-                <string>Num Frames</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="paramNumFrameLineEdit"/>
-             </item>
-             <item row="4" column="0">
-              <widget class="QCheckBox" name="paramCroppingCheckBox">
-               <property name="text">
-                <string>Cropping?</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="paramMarkingsLabel">
-               <property name="text">
-                <string>Markings</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QLineEdit" name="paramMarkingsLineEdit"/>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QPushButton" name="paramSampleImagesButton">
-            <property name="geometry">
-             <rect>
-              <x>850</x>
-              <y>70</y>
-              <width>191</width>
-              <height>41</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Sample Images</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="paramGuiMarkButton">
-            <property name="geometry">
-             <rect>
-              <x>850</x>
-              <y>150</y>
-              <width>191</width>
-              <height>41</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>GUI: Mark</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="paramCreateTrainingSetButton">
-            <property name="geometry">
-             <rect>
-              <x>840</x>
-              <y>220</y>
-              <width>211</width>
-              <height>51</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Create Training Set</string>
-            </property>
-           </widget>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_4">
+                <item>
+                 <widget class="QPushButton" name="paramSampleImagesButton">
+                  <property name="text">
+                   <string>Sample Images</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="paramGuiMarkButton">
+                  <property name="text">
+                   <string>GUI: Mark</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="paramCreateTrainingSetButton">
+                  <property name="text">
+                   <string>Create Training Set</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="markCheckTab">
            <attribute name="title">
@@ -284,6 +302,82 @@
        <attribute name="title">
         <string>train</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QTabWidget" name="trainTabWidget">
+          <widget class="QWidget" name="tab">
+           <attribute name="title">
+            <string>connect</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="1" column="0">
+             <widget class="QPushButton" name="connectConnectButton">
+              <property name="text">
+               <string>Connect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="gridLayout_6">
+              <item row="1" column="0">
+               <widget class="QLabel" name="connectUsernameLabel">
+                <property name="text">
+                 <string>username</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="connectHostnameLabel">
+                <property name="text">
+                 <string>hostname</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="connectUsernameLineEdit"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="connectPasswordLabel">
+                <property name="text">
+                 <string>password</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="connectHostnameLineEdit"/>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="connectPasswordLineEdit">
+                <property name="echoMode">
+                 <enum>QLineEdit::Password</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_2">
+           <attribute name="title">
+            <string>Tab 2</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="processTab">
        <attribute name="title">
@@ -305,11 +399,24 @@
         <height>300</height>
        </size>
       </property>
+      <property name="font">
+       <font>
+        <family>Courier 10 Pitch</family>
+        <pointsize>7</pointsize>
+       </font>
+      </property>
       <property name="mouseTracking">
        <bool>true</bool>
       </property>
       <property name="readOnly">
        <bool>true</bool>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier 10 Pitch'; font-size:7pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Courier'; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
@@ -320,8 +427,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1222</width>
-     <height>29</height>
+     <width>980</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -336,6 +443,39 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>mainTabWidget</tabstop>
+  <tabstop>pathsProjectNameLineEdit</tabstop>
+  <tabstop>pathsLocalLineEdit</tabstop>
+  <tabstop>pathsLocalButton</tabstop>
+  <tabstop>pathsNetworkVideoLineEdit</tabstop>
+  <tabstop>pathsNetworkVideoButton</tabstop>
+  <tabstop>pathsImportLineEdit</tabstop>
+  <tabstop>pathsImportButton</tabstop>
+  <tabstop>pathsImportPathsButton</tabstop>
+  <tabstop>logTextEdit</tabstop>
+  <tabstop>paramNameLineEdit</tabstop>
+  <tabstop>paramDataLineEdit</tabstop>
+  <tabstop>paramNumFrameLineEdit</tabstop>
+  <tabstop>paramSelectionComboBox</tabstop>
+  <tabstop>paramCroppingCheckBox</tabstop>
+  <tabstop>paramSampleImagesButton</tabstop>
+  <tabstop>paramGuiMarkButton</tabstop>
+  <tabstop>paramCreateTrainingSetButton</tabstop>
+  <tabstop>checkGraphicsView</tabstop>
+  <tabstop>checkFrameSlider</tabstop>
+  <tabstop>trainTabWidget</tabstop>
+  <tabstop>connectHostnameLineEdit</tabstop>
+  <tabstop>connectUsernameLineEdit</tabstop>
+  <tabstop>connectPasswordLineEdit</tabstop>
+  <tabstop>connectConnectButton</tabstop>
+  <tabstop>markTabWidget</tabstop>
+  <tabstop>paramCropMarginsXMin</tabstop>
+  <tabstop>paramCropMarginsXMax</tabstop>
+  <tabstop>paramCropMarginsYMin</tabstop>
+  <tabstop>paramCropMarginsYMax</tabstop>
+  <tabstop>paramMarkingsLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

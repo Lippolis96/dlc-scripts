@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-12-07T10:32:17
+# Project created by QtCreator 2018-12-07T15:05:01
 #
 #-------------------------------------------------
 
@@ -12,7 +12,7 @@ TARGET = dlc_serv_gui
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked as deprecated (the exact warnings
+# any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
