@@ -1,8 +1,13 @@
+#######################################################
+# Imports
+#######################################################
+
 import locale   # language settings for date/time
 import os       # allows file operations and direct command line execution
 import sys      # command line arguments
-import paramiko
+import inspect
 
+# QT
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
@@ -11,11 +16,19 @@ if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
 if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-from dlc_serv_gui.dlc_serv_gui.dlcgui import Ui_dlcgui
+# Deeplabcut
+# import deeplabcut
 
 
+# Append base directory
+#currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+#base_dir = currentdir[:currentdir.index('python')] + 'python/'
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path)
+print("Appended base directory", dir_path)
 
-
+from dlc_serv_gui.dlcgui import Ui_dlcgui
+from ssh_helper import sshConnectExec1
 
 
 #######################################################
@@ -37,14 +50,30 @@ class DLC_SERV_GUI () :
         self.gui.pathsLocalButton.clicked.connect(lambda: self.loadPathLocal())
         self.gui.pathsNetworkVideoButton.clicked.connect(lambda: self.loadPathNetwork())
         self.gui.pathsImportButton.clicked.connect(lambda: self.loadPathImport())
+        self.gui.pathsImportPathsButton.clicked.connect(lambda: self.pathsImportPaths())
 
+        # Mark->Params
+        self.gui.paramSampleImagesButton.clicked.connect(lambda: self.paramsSampleImages())
+        self.gui.paramGuiMarkButton.clicked.connect(lambda: self.paramsGUIMark())
+        self.gui.paramCreateTrainingSetButton.clicked.connect(lambda: self.paramsCreateTrainingSet())
+        
         # Train->Connect
         self.gui.connectConnectButton.clicked.connect(lambda: self.connectServ())
 
+    # Change global font size of the application
     def zoomFont(self, mag):
         self.fontSize += mag
         app.setFont(QtGui.QFont("Comic Sans", self.fontSize))
-
+        
+    # Write colored output to the log QTextEdit widget
+    def writeLog(self, text, param):
+        if param["type"] == "plain":
+            self.gui.logTextEdit.insertPlainText(text)
+        elif param["type"] == "html":
+            html_text = "<font color=\""+param["color"]+"\">" + text + "</font><br>"
+            self.gui.logTextEdit.insertHtml(html_text)
+        else:
+            raise ValueError("Unknown output type" + param["type"])
 
     def loadPathLocal(self):
         self.pathLocal = QtWidgets.QFileDialog.getExistingDirectory(caption="Open Local Project Folder", directory="~/")
@@ -57,32 +86,74 @@ class DLC_SERV_GUI () :
     def loadPathImport(self):
         self.pathImport = QtWidgets.QFileDialog.getExistingDirectory(caption="Open Existing project folder to import settings", directory="~/")
         self.gui.pathsImportLineEdit.setText(self.pathImport)
+    
+    def pathsImportPaths(self):
+        self.newProjectName = self.gui.pathsProjectNameLineEdit.text()
+        self.newProjectPath = self.gui.pathsLocalLineEdit.text()
+        self.newVideoFolderPath = self.gui.pathsNetworkVideoLineEdit.text()
+        self.importProjectPath = self.gui.pathsImportLineEdit.text()
+        
+        # List videos in the video folder
+        # Find video size, check that it is the same for all videos
+        
+        # Find and import config.yaml from the example directory
+        # Auto-Fill in params tab
+        
+    # Read and check all fields on the params tab
+    # Create deeplabcut project
+    # Fill parameters into new config.yaml
+    # Run image sampling
+    def paramsSampleImages(self):
+        # Enter the path of the config file that was just created from the above step (check the folder)
+        #path_config_file = '/home/alfomi/work/DLC_DOCKER/example-pia/Tracking-Pia-2018-12-06/config.yaml'
+        
+        param = {
+            "Task"              : self.gui.paramProjectNameLineEdit.text(),
+            "scorer"            : self.gui.paramNameLineEdit.text(),
+            "date"              : self.gui.paramDateLineEdit.text(),
+            "numframes2pick"    : int(self.gui.paramNumFrameLineEdit.text()),
+            "clustering"        : self.gui.paramSelectionComboBox.currentText(),
+            "cropping"          : bool(self.gui.paramCroppingCheckBox.checkState()),
+            "bodyparts"         : self.gui.paramMarkingsLineEdit.text().replace(" ", "").split(","),
+            "crop_margins"      : [
+                int(self.gui.paramCropMarginsXMin.text()),
+                int(self.gui.paramCropMarginsXMax.text()),
+                int(self.gui.paramCropMarginsYMin.text()),
+                int(self.gui.paramCropMarginsYMax.text())
+            ]
+        }
 
-    def text2html(self, text, color):
-        return "<font color=\""+color+"\">" + text + "</font><br>"
-
+        print(param)
+        
+        # deeplabcut.create_new_project(param["Task"], param["scorer"], self.newVideoList, working_directory=self.pathLocal, copy_videos=False)
+        
+        # deeplabcut.extract_frames(path_config_file, 'automatic', param["cluster"], crop=param["crop"])
+    
+    
+    # Start wxPython GUI to mark frames
+    def paramsGUIMark(self):
+        
+        # Run GUI
+        # %gui wx
+        deeplabcut.label_frames(path_config_file)
+        
+        # this creates a subdirectory with the frames + your labels
+        deeplabcut.check_labels(path_config_file)
+        
+    # Create training set using DLC
+    # Locate and import marked images into check tab
+    def paramsCreateTrainingSet(self):
+        deeplabcut.create_training_dataset(path_config_file)
+        
+    # Connect to server using parameters from GUI, attempt to run nvidia-smi there
     def connectServ(self):
         self.connectParam = {
             "username": self.gui.connectUsernameLineEdit.text(),
             "hostname": self.gui.connectHostnameLineEdit.text(),
             "password": self.gui.connectPasswordLineEdit.text()
         }
-
-        self.gui.logTextEdit.insertHtml(self.text2html("Attempting to connect to host...", "Blue"))
-        self.sshClient = paramiko.SSHClient()
-        self.sshClient.load_system_host_keys()
-        self.sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.sshClient.connect(**self.connectParam)
-
-        self.gui.logTextEdit.insertHtml(self.text2html("Checking GPU status...", "Blue"))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.sshClient.exec_command("nvidia-smi")
-        self.gui.logTextEdit.insertPlainText("".join(ssh_stdout.readlines()))
-
-        self.gui.logTextEdit.insertHtml(self.text2html("Closing connection...", "Blue"))
-        self.sshClient.close()
-
-        # FOR CONTINUOUS OUTPUT, BELOW WILL RUN UNTIL EOF, AND WAIT IF EOF DOES NOT YET EXIST
-        # for line in iter(lambda: stdout.readline(2048), ""): print(line, end="")
+        
+        sshConnectExec1(self.connectParam, self, "nvidia-smi")
 
 
 #######################################################
