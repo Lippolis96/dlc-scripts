@@ -5,6 +5,7 @@
 import locale   # language settings for date/time
 import os       # allows file operations and direct command line execution
 import sys      # command line arguments
+import glob     # list files in directory
 import inspect
 
 # QT
@@ -29,6 +30,8 @@ print("Appended base directory", dir_path)
 
 from dlc_serv_gui.dlcgui import Ui_dlcgui
 from ssh_helper import sshConnectExec1
+from opencv_helper import getVideoShape
+from yaml_helper import yaml_read_dict, yaml_write_dict
 
 
 #######################################################
@@ -42,14 +45,30 @@ class DLC_SERV_GUI () :
         self.gui.setupUi(dialog)
         self.fontSize = 20
 
+        # Logging font parameters
+        self.logparam = {
+            "output" : {"type" : "plain"},
+            "action" : {"type" : "html", "color" : "Blue"},
+            "error"  : {"type" : "html", "color" : "Red"}
+        }
+
+        # Global project variables
+        self.metadata = {  # Dictionary with all project metadata
+            "path"  : {},  # All paths
+            "param" : {},  # All project parameters
+        }
+
         # Interface
         shortcutZoomPlus = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_Plus), self.dialog, lambda: self.zoomFont(+1))
         shortcutZoomMinus = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_Minus), self.dialog, lambda: self.zoomFont(-1))
 
         # Mark->Paths
-        self.gui.pathsLocalButton.clicked.connect(lambda: self.loadPathLocal())
-        self.gui.pathsNetworkVideoButton.clicked.connect(lambda: self.loadPathNetwork())
-        self.gui.pathsImportButton.clicked.connect(lambda: self.loadPathImport())
+        self.gui.pathsLocalButton.clicked.connect(
+            lambda: self.loadSetDir(self.gui.pathsLocalLineEdit, "Open Local Project Folder", "~/"))
+        self.gui.pathsNetworkVideoButton.clicked.connect(
+            lambda: self.loadSetDir(self.gui.pathsNetworkVideoLineEdit, "Open Network Folder with Videos", "~/"))
+        self.gui.pathsImportButton.clicked.connect(
+            lambda: self.loadSetDir(self.gui.pathsImportLineEdit, "Open Existing project folder to import settings", "~/"))
         self.gui.pathsImportPathsButton.clicked.connect(lambda: self.pathsImportPaths())
 
         # Mark->Params
@@ -75,28 +94,51 @@ class DLC_SERV_GUI () :
         else:
             raise ValueError("Unknown output type" + param["type"])
 
-    def loadPathLocal(self):
-        self.pathLocal = QtWidgets.QFileDialog.getExistingDirectory(caption="Open Local Project Folder", directory="~/")
-        self.gui.pathsLocalLineEdit.setText(self.pathLocal)
 
-    def loadPathNetwork(self):
-        self.pathNetwork = QtWidgets.QFileDialog.getExistingDirectory(caption="Open Network Folder with Videos", directory="~/")
-        self.gui.pathsNetworkVideoLineEdit.setText(self.pathNetwork)
-
-    def loadPathImport(self):
-        self.pathImport = QtWidgets.QFileDialog.getExistingDirectory(caption="Open Existing project folder to import settings", directory="~/")
-        self.gui.pathsImportLineEdit.setText(self.pathImport)
+    # Open a directory and set its path to a local lineedit
+    def loadSetDir(self, lineedit, caption, dir):
+        lineedit.setText(QtWidgets.QFileDialog.getExistingDirectory(caption=caption, directory=dir))
     
     def pathsImportPaths(self):
-        self.newProjectName = self.gui.pathsProjectNameLineEdit.text()
-        self.newProjectPath = self.gui.pathsLocalLineEdit.text()
-        self.newVideoFolderPath = self.gui.pathsNetworkVideoLineEdit.text()
-        self.importProjectPath = self.gui.pathsImportLineEdit.text()
+        self.metadata["path"]["local_project"] = self.gui.pathsLocalLineEdit.text()
+        self.metadata["path"]["video_folder"] = self.gui.pathsNetworkVideoLineEdit.text()
+        self.metadata["path"]["import_project"] = self.gui.pathsImportLineEdit.text()
         
         # List videos in the video folder
+        self.metadata["path"]["videolist"] = glob.glob(os.path.join(self.metadata["path"]["video_folder"], '*.avi'))
+        if len(self.metadata["path"]["videolist"]) == 0:
+            self.writeLog("No suitable .avi files have been found in " + self.metadata["path"]["video_folder"] , self.logparam["error"])
+            return 0  # Exit the function
+
         # Find video size, check that it is the same for all videos
-        
+        self.writeLog("Importing videos...", self.logparam["action"])
+        vidshapes = {getVideoShape(vidpath) for vidpath in self.metadata["path"]["videolist"]}
+        if None in vidshapes:
+            self.writeLog("Some video files failed to load: " + str(vidshapes), self.logparam["error"])
+            return 0  # Exit the function
+        elif len(vidshapes) == 1:
+            self.metadata["param"]["video_shape"] = list(vidshapes)[0]
+            self.writeLog("Loaded " + str(len(self.metadata["path"]["videolist"])) + " videos with shape " + str(list(vidshapes)[0]), self.logparam["output"])
+        else:
+            self.writeLog("Provided videos have different shapes" + str(vidshapes), self.logparam["error"])
+            return 0  # Exit the function
+
+
         # Find and import config.yaml from the example directory
+        if self.metadata["path"]["import_project"] != "":
+            self.metadata["path"]["import_config_yaml"] = "???"
+            importParam = yaml_read_dict(self.metadata["path"]["import_config_yaml"])
+
+            "Task"              : self.gui.paramProjectNameLineEdit.text(),
+            "scorer"            : self.gui.paramNameLineEdit.text(),
+            "date"              : self.gui.paramDateLineEdit.text(),
+            "numframes2pick"    : int(self.gui.paramNumFrameLineEdit.text()),
+            "clustering"        : self.gui.paramSelectionComboBox.currentText(),
+            "cropping"          : bool(self.gui.paramCroppingCheckBox.checkState()),
+            "bodyparts"         : self.gui.paramMarkingsLineEdit.text().replace(" ", "").split(","),
+
+
+
         # Auto-Fill in params tab
         
     # Read and check all fields on the params tab
@@ -106,8 +148,8 @@ class DLC_SERV_GUI () :
     def paramsSampleImages(self):
         # Enter the path of the config file that was just created from the above step (check the folder)
         #path_config_file = '/home/alfomi/work/DLC_DOCKER/example-pia/Tracking-Pia-2018-12-06/config.yaml'
-        
-        param = {
+
+        self.metadata["param"] = {
             "Task"              : self.gui.paramProjectNameLineEdit.text(),
             "scorer"            : self.gui.paramNameLineEdit.text(),
             "date"              : self.gui.paramDateLineEdit.text(),
@@ -122,12 +164,19 @@ class DLC_SERV_GUI () :
                 int(self.gui.paramCropMarginsYMax.text())
             ]
         }
-
-        print(param)
         
-        # deeplabcut.create_new_project(param["Task"], param["scorer"], self.newVideoList, working_directory=self.pathLocal, copy_videos=False)
+        # deeplabcut.create_new_project(
+        #     self.metadata["param"]["Task"],
+        #     self.metadata["param"]["scorer"],
+        #     self.metadata["path"]["videolist"],
+        #     working_directory=self.metadata["path"]["local"],
+        #     copy_videos=False)
         
-        # deeplabcut.extract_frames(path_config_file, 'automatic', param["cluster"], crop=param["crop"])
+        # deeplabcut.extract_frames(
+        #     self.metadata["path"]["configfile"],
+        #     'automatic',
+        #     self.metadata["param"]["clustering"],
+        #     crop=self.metadata["param"]["cropping"])
     
     
     # Start wxPython GUI to mark frames
@@ -135,15 +184,15 @@ class DLC_SERV_GUI () :
         
         # Run GUI
         # %gui wx
-        deeplabcut.label_frames(path_config_file)
+        deeplabcut.label_frames(self.metadata["path"]["configfile"])
         
         # this creates a subdirectory with the frames + your labels
-        deeplabcut.check_labels(path_config_file)
+        deeplabcut.check_labels(self.metadata["path"]["configfile"])
         
     # Create training set using DLC
     # Locate and import marked images into check tab
     def paramsCreateTrainingSet(self):
-        deeplabcut.create_training_dataset(path_config_file)
+        deeplabcut.create_training_dataset(self.metadata["path"]["configfile"])
         
     # Connect to server using parameters from GUI, attempt to run nvidia-smi there
     def connectServ(self):
