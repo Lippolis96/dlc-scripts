@@ -42,7 +42,7 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_3">
                <item row="2" column="1">
-                <widget class="QLineEdit" name="pathsNetworkVideoLineEdit"/>
+                <widget class="QLineEdit" name="pathsVideoLineEdit"/>
                </item>
                <item row="1" column="1">
                 <widget class="QLineEdit" name="pathsLocalLineEdit"/>
@@ -72,14 +72,14 @@
                 </widget>
                </item>
                <item row="2" column="0">
-                <widget class="QLabel" name="pathsNetworkVideoLabel">
+                <widget class="QLabel" name="pathsVideoLabel">
                  <property name="text">
                   <string>Video folder</string>
                  </property>
                 </widget>
                </item>
                <item row="2" column="2">
-                <widget class="QPushButton" name="pathsNetworkVideoButton">
+                <widget class="QPushButton" name="pathsVideoButton">
                  <property name="text">
                   <string>Open</string>
                  </property>
@@ -125,6 +125,16 @@
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
                 <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="6" column="0">
+                  <widget class="QCheckBox" name="paramCroppingCheckBox">
+                   <property name="text">
+                    <string>frame-crop</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="paramSelectionLabel">
                    <property name="text">
@@ -170,41 +180,53 @@
                   <layout class="QHBoxLayout" name="horizontalLayout">
                    <item>
                     <widget class="QLineEdit" name="paramCropMarginsXMin">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
                      <property name="readOnly">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
                     <widget class="QLineEdit" name="paramCropMarginsXMax">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
                      <property name="readOnly">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
                     <widget class="QLineEdit" name="paramCropMarginsYMin">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
                      <property name="readOnly">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
                     <widget class="QLineEdit" name="paramCropMarginsYMax">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
                      <property name="readOnly">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -220,32 +242,15 @@
                  <item row="3" column="1">
                   <widget class="QLineEdit" name="paramNumFrameLineEdit"/>
                  </item>
-                 <item row="5" column="0">
-                  <widget class="QCheckBox" name="paramCroppingCheckBox">
-                   <property name="text">
-                    <string>Cropping?</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="0">
+                 <item row="8" column="0">
                   <widget class="QLabel" name="paramMarkingsLabel">
                    <property name="text">
                     <string>Markings</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="1">
+                 <item row="8" column="1">
                   <widget class="QLineEdit" name="paramMarkingsLineEdit"/>
-                 </item>
-                 <item row="6" column="0">
-                  <widget class="QLabel" name="paramMarginsLabel">
-                   <property name="text">
-                    <string>Crop margins</string>
-                   </property>
-                  </widget>
                  </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="paramProjectNameLabel">
@@ -260,6 +265,37 @@
                     <string>TrackingMyCatWhyNot14_43</string>
                    </property>
                   </widget>
+                 </item>
+                 <item row="7" column="0">
+                  <widget class="QLabel" name="paramTimeCropLabel">
+                   <property name="text">
+                    <string>time-crop</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_3">
+                   <item>
+                    <widget class="QLabel" name="paramTimeCropStartLabel">
+                     <property name="text">
+                      <string>start</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="paramTimeCropStartLineEdit"/>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="paramTimeCropStopLabel">
+                     <property name="text">
+                      <string>stop</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="paramTimeCropStopLineEdit"/>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </item>
@@ -340,6 +376,9 @@
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="0">
           <widget class="QTabWidget" name="trainTabWidget">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
            <widget class="QWidget" name="tab">
             <attribute name="title">
              <string>connect</string>
@@ -462,7 +501,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>980</width>
-     <height>29</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -481,8 +520,8 @@ p, li { white-space: pre-wrap; }
   <tabstop>mainTabWidget</tabstop>
   <tabstop>pathsLocalLineEdit</tabstop>
   <tabstop>pathsLocalButton</tabstop>
-  <tabstop>pathsNetworkVideoLineEdit</tabstop>
-  <tabstop>pathsNetworkVideoButton</tabstop>
+  <tabstop>pathsVideoLineEdit</tabstop>
+  <tabstop>pathsVideoButton</tabstop>
   <tabstop>pathsImportLineEdit</tabstop>
   <tabstop>pathsImportButton</tabstop>
   <tabstop>pathsImportPathsButton</tabstop>
@@ -491,7 +530,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>paramDateLineEdit</tabstop>
   <tabstop>paramNumFrameLineEdit</tabstop>
   <tabstop>paramSelectionComboBox</tabstop>
-  <tabstop>paramCroppingCheckBox</tabstop>
   <tabstop>paramSampleImagesButton</tabstop>
   <tabstop>paramGuiMarkButton</tabstop>
   <tabstop>paramCreateTrainingSetButton</tabstop>
