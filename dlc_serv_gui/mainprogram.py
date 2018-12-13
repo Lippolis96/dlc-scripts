@@ -1,5 +1,9 @@
-# TODO: QT->params->Remove Date Fields ::: it is set automatically
-# TODO: QT->params->Add resnet ComboBox ::: 50 vs 101
+# TODO: Allow import existing project and skip params part
+# TODO: add @pyqtSlot() decorator to all methods implementing the log write
+# TODO: Pass all logging output through myReceiver to avoid threading problems
+# TODO: Disable GUI every time a long process is started
+# TODO: Ensure all threads exit normally
+# TODO: Ensure stderr is also ported to logbox correctly
 
 
 #######################################################
@@ -11,8 +15,7 @@ import os       # allows file operations and direct command line execution
 import sys      # command line arguments
 import glob     # list files in directory
 import inspect
-from time import gmtime, strftime
-
+from queue import Queue
 
 # QT
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -23,8 +26,12 @@ if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
 if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-# Deeplabcut
-import deeplabcut
+# Matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+import matplotlib.image as mpimg
+# from matplotlib.backends.qt_compat import QtCore, QtWidgets, is_pyqt5
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
 # Append base directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -36,14 +43,9 @@ from dlc_serv_gui.dlcgui import Ui_dlcgui
 from ssh_helper import sshConnectExec1
 from opencv_helper import getVideoShape
 from yaml_helper import yaml_read_dict, yaml_write_dict
-
-
-# Tool to output stream to QTextEdit
-class EmittingStream(QtCore.QObject):
-    textWritten = QtCore.pyqtSignal(str)
-
-    def write(self, text):
-        self.textWritten.emit(str(text))
+from qt_helper import updateComboBoxByValue
+from qthread_helper import WriteStream, createRunThread, MyReceiver, ObjectFunction
+from dlc_helper import dlcSampleImages, dlcCreateCheckLabels, dlcCreateTrainingSet
 
 #######################################################
 # Main Window
@@ -69,10 +71,6 @@ class DLC_SERV_GUI () :
             "param" : {},  # All project parameters
         }
 
-        # Forward output to manual stream function
-        sys.stdout = EmittingStream(textWritten = lambda text: self.writeLog(text, self.logparam["output"]))
-        sys.stderr = EmittingStream(textWritten = lambda text: self.writeLog(text, self.logparam["error"]))
-
         # Interface
         shortcutZoomPlus = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_Plus), self.dialog, lambda: self.zoomFont(+1))
         shortcutZoomMinus = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_Minus), self.dialog, lambda: self.zoomFont(-1))
@@ -90,9 +88,29 @@ class DLC_SERV_GUI () :
         self.gui.paramSampleImagesButton.clicked.connect(lambda: self.paramsSampleImages())
         self.gui.paramGuiMarkButton.clicked.connect(lambda: self.paramsGUIMark())
         self.gui.paramCreateTrainingSetButton.clicked.connect(lambda: self.paramsCreateTrainingSet())
-        
+
+        # Mark->Check
+        self.gui.checkFrameLoadButton.clicked.connect(lambda: self.checkFindFrames())
+        self.gui.checkFrameSlider.valueChanged.connect(lambda: self.checkLoadFrame())
+
         # Train->Connect
         self.gui.connectConnectButton.clicked.connect(lambda: self.connectServ())
+
+
+        # Create canvas for checking
+        self.checkCanvasFig = plt.figure()
+        self.checkStaticCanvas = FigureCanvasQTAgg(self.checkCanvasFig)  # figsize=(5, 3)
+        self.gui.checkCanvasLayout.addWidget(self.checkStaticCanvas)
+        self.checkStaticCanvas.draw()
+        toolbar = NavigationToolbar2QT(self.checkStaticCanvas, self.gui.checkCanvasWidget, coordinates=True)
+        self.gui.checkCanvasLayout.addWidget(toolbar)
+        #self.checkStaticAxis = self.checkStaticCanvas.figure.subplots()
+
+        # self.checkDynamicCanvas = FigureCanvas(Figure()) # figsize=(5, 3)
+        # self.gui.checkCanvasLayout.addWidget(self.checkDynamicCanvas)
+        # self.addToolBar(QtCore.Qt.BottomToolBarArea, NavigationToolbar2QT(self.checkDynamicCanvas, self))
+        # self.checkDynamicAxis = self.checkDynamicCanvas.figure.subplots()
+
 
     # Destructor
     def __del__(self):
@@ -122,7 +140,8 @@ class DLC_SERV_GUI () :
     # Open a directory and set its path to a local lineedit
     def loadSetDir(self, lineedit, caption, dir):
         lineedit.setText(QtWidgets.QFileDialog.getExistingDirectory(caption=caption, directory=dir))
-    
+
+    #
     def pathsImportPaths(self):
         self.metadata["path"]["local_project"] = self.gui.pathsLocalLineEdit.text()
         self.metadata["path"]["video_folder"] = self.gui.pathsVideoLineEdit.text()
@@ -158,18 +177,21 @@ class DLC_SERV_GUI () :
             # Find and import config.yaml from the example directory
             importParam = yaml_read_dict(self.metadata["path"]["import_yaml"])
 
-            print(importParam)
-
             # Auto-Fill in params tab
             self.gui.paramProjectNameLineEdit.setText(importParam["Task"])
             self.gui.paramNameLineEdit.setText(importParam["scorer"])
-            self.gui.paramDateLineEdit.setText(importParam["date"])
             self.gui.paramNumFrameLineEdit.setText(str(importParam["numframes2pick"]))
             #self.gui.paramSelectionComboBox.currentText()
             self.gui.paramCroppingCheckBox.setCheckState(2 * int(importParam["cropping"]))
             self.gui.paramMarkingsLineEdit.setText(",".join(importParam["bodyparts"]))
             self.gui.paramTimeCropStartLineEdit.setText(str(importParam["start"]))
             self.gui.paramTimeCropStopLineEdit.setText(str(importParam["stop"]))
+
+            # Auto-fill manual parameters, that are not in DLC config by default
+            if "sampling" in importParam.keys():
+                updateComboBoxByValue(self.gui.paramSamplingComboBox, importParam["sampling"])
+            if "clustering" in importParam.keys():
+                updateComboBoxByValue(self.gui.paramClusteringComboBox, importParam["clustering"])
 
             self.writeLog("Parameters from import file were loaded", self.logparam["action"])
         else:
@@ -186,9 +208,9 @@ class DLC_SERV_GUI () :
         self.metadata["param"] = {
             "Task"              : self.gui.paramProjectNameLineEdit.text(),
             "scorer"            : self.gui.paramNameLineEdit.text(),
-            "date"              : self.gui.paramDateLineEdit.text(),
             "numframes2pick"    : int(self.gui.paramNumFrameLineEdit.text()),
-            "clustering"        : self.gui.paramSelectionComboBox.currentText(),
+            "sampling"          : self.gui.paramSamplingComboBox.currentText(),
+            "clustering"        : self.gui.paramClusteringComboBox.currentText(),
             "cropping"          : bool(self.gui.paramCroppingCheckBox.checkState()),
             "bodyparts"         : self.gui.paramMarkingsLineEdit.text().replace(" ", "").split(","),
             "start"             : int(self.gui.paramTimeCropStartLineEdit.text()),
@@ -203,51 +225,55 @@ class DLC_SERV_GUI () :
 
         # Create a new DeepLabCut project
         self.writeLog("DeepLabCut is creating a project", self.logparam["action"])
-        deeplabcut.create_new_project(
-            self.metadata["param"]["Task"],
-            self.metadata["param"]["scorer"],
-            self.metadata["path"]["videolist"],
-            working_directory=self.metadata["path"]["local_project"],
-            copy_videos=False)
-
-        # Find the new config path
-        self.writeLog("Updating DeepLabCut config file with user settings", self.logparam["action"])
-        relTaskFolderName = self.metadata["param"]["Task"] + "-"
-        relTaskFolderName += self.metadata["param"]["scorer"] + "-"
-        relTaskFolderName += strftime("%Y-%m-%d", gmtime())
-        relConfigPath = os.path.join(relTaskFolderName, "config.yaml")
-        self.metadata["path"]["configfile"] = os.path.join(self.metadata["path"]["local_project"], relConfigPath)
-
-        # Read the new config file, update it with user params, and save it again
-        self.writeLog("Searching for config.yaml in " + self.metadata["path"]["configfile"], self.logparam["action"])
-        currentParam = yaml_read_dict(self.metadata["path"]["configfile"])
-        currentParam.update(self.metadata["param"])
-        yaml_write_dict(self.metadata["path"]["configfile"], currentParam)
-
-        self.writeLog("Updating DeepLabCut config file with user settings", self.logparam["action"])
-        # Extract frames using DLC algorithm
-        deeplabcut.extract_frames(
-            self.metadata["path"]["configfile"],
-            'automatic',
-            self.metadata["param"]["clustering"],
-            crop=self.metadata["param"]["cropping"])
+        self.dlc_sample_obj = ObjectFunction(lambda : dlcSampleImages(self.metadata))
+        self.dlc_create_thread = createRunThread(self.dlc_sample_obj)
     
     
     # Start wxPython GUI to mark frames
     def paramsGUIMark(self):
-        
-        # Run GUI
-        # %gui wx
-        deeplabcut.label_frames(self.metadata["path"]["configfile"])
-        
-        # this creates a subdirectory with the frames + your labels
-        deeplabcut.check_labels(self.metadata["path"]["configfile"])
+        self.writeLog("Mark frames using wxPython interface", self.logparam["action"])
+        self.dlc_mark_check_obj = ObjectFunction(lambda : dlcCreateCheckLabels(self.metadata["path"]["configfile"]))
+        self.dlc_mark_check_thread = createRunThread(self.dlc_mark_check_obj)
+
 
 
     # Create training set using DLC
     # Locate and import marked images into check tab
     def paramsCreateTrainingSet(self):
-        deeplabcut.create_training_dataset(self.metadata["path"]["configfile"])
+        self.writeLog("DeepLabCut is creating a training set", self.logparam["action"])
+        self.dlc_create_training_obj = ObjectFunction(lambda : dlcCreateTrainingSet(self.metadata["path"]["configfile"]))
+        self.dlc_create_training_thread = createRunThread(self.dlc_create_training_obj)
+
+
+    def checkFindFrames(self):
+        # Find frames directory
+        imagesDir = QtWidgets.QFileDialog.getExistingDirectory(caption="Find images", directory="~/")
+
+        # Load list of images
+        self.metadata["path"]["checkimages"] = glob.glob(os.path.join(imagesDir, '*.png'))
+
+        if len(self.metadata["path"]["checkimages"]):
+            # Set slider properties based on image quantity
+            self.gui.checkFrameSlider.setMinimum(0)
+            self.gui.checkFrameSlider.setMaximum(len(self.metadata["path"]["checkimages"]) - 1)
+            self.gui.checkFrameSlider.setValue(0)
+
+            # Load first image
+            self.gui.checkFrameSlider.setEnabled(True)
+            self.checkLoadFrame(init=True)
+        else:
+            self.writeLog("No images found", self.logparam["error"])
+
+    def checkLoadFrame(self, init=False):
+        imageIdx = self.gui.checkFrameSlider.value()
+        img = mpimg.imread(self.metadata["path"]["checkimages"][imageIdx])
+        if init:
+            plt.figure(self.checkCanvasFig.number)
+            self.checkCurrentImage = plt.imshow(img)
+            plt.axis('off')
+        else:
+            self.checkCurrentImage.set_data(img)
+        self.checkStaticCanvas.draw()
 
 
     # Connect to server using parameters from GUI, attempt to run nvidia-smi there
@@ -270,5 +296,14 @@ if __name__ == '__main__' :
     mainwindow = QtWidgets.QMainWindow()
     locale.setlocale(locale.LC_TIME, "en_GB.utf8")
     pth1 = DLC_SERV_GUI(mainwindow, app)
+
+    # Create Queue and redirect sys.stdout to this queue
+    logOutQueue = Queue()
+    sys.stdout = WriteStream(logOutQueue)
+
+    # Create thread that will listen on the other end of the queue, and send the text to the textedit in our application
+    receiverObj = MyReceiver(logOutQueue, lambda text: pth1.writeLog(text, pth1.logparam["output"]))
+    receiverThread = createRunThread(receiverObj)
+
     mainwindow.show()
     sys.exit(app.exec_())

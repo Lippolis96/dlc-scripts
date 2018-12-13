@@ -32,7 +32,7 @@
          <item>
           <widget class="QTabWidget" name="markTabWidget">
            <property name="currentIndex">
-            <number>1</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="markPathsTab">
             <attribute name="title">
@@ -88,7 +88,7 @@
                <item row="4" column="0">
                 <widget class="QLabel" name="pathsImportLabel">
                  <property name="text">
-                  <string>Import project folder</string>
+                  <string>Import config file</string>
                  </property>
                 </widget>
                </item>
@@ -125,58 +125,31 @@
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
                 <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="6" column="0">
+                 <item row="5" column="0">
                   <widget class="QCheckBox" name="paramCroppingCheckBox">
                    <property name="text">
-                    <string>frame-crop</string>
+                    <string>Frame-crop</string>
                    </property>
                    <property name="checked">
                     <bool>false</bool>
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="paramSelectionLabel">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="paramFrameSelectionLabel">
                    <property name="text">
-                    <string>Selection</string>
+                    <string>Frame selection</string>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QComboBox" name="paramSelectionComboBox">
-                   <item>
-                    <property name="text">
-                     <string>uniform</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>k-means</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="paramNameLabel">
                    <property name="text">
-                    <string>Marker Name</string>
+                    <string>Marker name</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="paramDataLabel">
-                   <property name="text">
-                    <string>Date</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="paramNameLineEdit"/>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="paramDateLineEdit"/>
-                 </item>
-                 <item row="6" column="1">
+                 <item row="5" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout">
                    <item>
                     <widget class="QLineEdit" name="paramCropMarginsXMin">
@@ -232,24 +205,28 @@
                    </item>
                   </layout>
                  </item>
-                 <item row="3" column="0">
+                 <item row="2" column="0">
                   <widget class="QLabel" name="paramNumFrameLabel">
                    <property name="text">
-                    <string>Num Frames</string>
+                    <string>Frame number</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="paramNumFrameLineEdit"/>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="paramNumFrameLineEdit">
+                   <property name="text">
+                    <string>45</string>
+                   </property>
+                  </widget>
                  </item>
-                 <item row="8" column="0">
+                 <item row="7" column="0">
                   <widget class="QLabel" name="paramMarkingsLabel">
                    <property name="text">
                     <string>Markings</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="8" column="1">
+                 <item row="7" column="1">
                   <widget class="QLineEdit" name="paramMarkingsLineEdit"/>
                  </item>
                  <item row="0" column="0">
@@ -266,14 +243,14 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="0">
+                 <item row="6" column="0">
                   <widget class="QLabel" name="paramTimeCropLabel">
                    <property name="text">
-                    <string>time-crop</string>
+                    <string>Time-crop</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="1">
+                 <item row="6" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout_3">
                    <item>
                     <widget class="QLabel" name="paramTimeCropStartLabel">
@@ -283,7 +260,11 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="paramTimeCropStartLineEdit"/>
+                    <widget class="QLineEdit" name="paramTimeCropStartLineEdit">
+                     <property name="text">
+                      <string>0</string>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QLabel" name="paramTimeCropStopLabel">
@@ -293,7 +274,71 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="paramTimeCropStopLineEdit"/>
+                    <widget class="QLineEdit" name="paramTimeCropStopLineEdit">
+                     <property name="text">
+                      <string>1</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="8" column="0">
+                  <widget class="QLabel" name="paramResNetLabel">
+                   <property name="text">
+                    <string>ResNet</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="1">
+                  <widget class="QComboBox" name="paramResNetComboBox">
+                   <item>
+                    <property name="text">
+                     <string>50</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>101</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="paramNameLineEdit">
+                   <property name="text">
+                    <string>MaxMusterman</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_4">
+                   <item>
+                    <widget class="QComboBox" name="paramSamplingComboBox">
+                     <item>
+                      <property name="text">
+                       <string>automatic</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>manual</string>
+                      </property>
+                     </item>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QComboBox" name="paramClusteringComboBox">
+                     <item>
+                      <property name="text">
+                       <string>uniform</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>kmeans</string>
+                      </property>
+                     </item>
+                    </widget>
                    </item>
                   </layout>
                  </item>
@@ -354,14 +399,40 @@
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
-              <widget class="QGraphicsView" name="checkGraphicsView"/>
+              <widget class="QWidget" name="checkCanvasWidget" native="true">
+               <layout class="QGridLayout" name="gridLayout">
+                <item row="0" column="0">
+                 <layout class="QVBoxLayout" name="checkCanvasLayout"/>
+                </item>
+               </layout>
+              </widget>
              </item>
              <item>
-              <widget class="QSlider" name="checkFrameSlider">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="topMargin">
+                <number>0</number>
                </property>
-              </widget>
+               <item>
+                <widget class="QPushButton" name="checkFrameLoadButton">
+                 <property name="text">
+                  <string>Load</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="checkFrameSlider">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximum">
+                  <number>0</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -518,33 +589,37 @@ p, li { white-space: pre-wrap; }
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>mainTabWidget</tabstop>
+  <tabstop>markTabWidget</tabstop>
   <tabstop>pathsLocalLineEdit</tabstop>
-  <tabstop>pathsLocalButton</tabstop>
   <tabstop>pathsVideoLineEdit</tabstop>
-  <tabstop>pathsVideoButton</tabstop>
   <tabstop>pathsImportLineEdit</tabstop>
+  <tabstop>pathsLocalButton</tabstop>
+  <tabstop>pathsVideoButton</tabstop>
   <tabstop>pathsImportButton</tabstop>
   <tabstop>pathsImportPathsButton</tabstop>
-  <tabstop>logTextEdit</tabstop>
+  <tabstop>paramProjectNameLineEdit</tabstop>
   <tabstop>paramNameLineEdit</tabstop>
-  <tabstop>paramDateLineEdit</tabstop>
   <tabstop>paramNumFrameLineEdit</tabstop>
-  <tabstop>paramSelectionComboBox</tabstop>
+  <tabstop>paramSamplingComboBox</tabstop>
+  <tabstop>paramClusteringComboBox</tabstop>
+  <tabstop>paramCroppingCheckBox</tabstop>
+  <tabstop>paramCropMarginsXMin</tabstop>
+  <tabstop>paramCropMarginsXMax</tabstop>
+  <tabstop>paramCropMarginsYMin</tabstop>
+  <tabstop>paramCropMarginsYMax</tabstop>
+  <tabstop>paramTimeCropStartLineEdit</tabstop>
+  <tabstop>paramTimeCropStopLineEdit</tabstop>
+  <tabstop>paramMarkingsLineEdit</tabstop>
+  <tabstop>paramResNetComboBox</tabstop>
   <tabstop>paramSampleImagesButton</tabstop>
   <tabstop>paramGuiMarkButton</tabstop>
   <tabstop>paramCreateTrainingSetButton</tabstop>
-  <tabstop>checkGraphicsView</tabstop>
-  <tabstop>checkFrameSlider</tabstop>
   <tabstop>trainTabWidget</tabstop>
   <tabstop>connectHostnameLineEdit</tabstop>
   <tabstop>connectUsernameLineEdit</tabstop>
   <tabstop>connectPasswordLineEdit</tabstop>
   <tabstop>connectConnectButton</tabstop>
-  <tabstop>paramCropMarginsXMin</tabstop>
-  <tabstop>paramCropMarginsXMax</tabstop>
-  <tabstop>paramCropMarginsYMin</tabstop>
-  <tabstop>paramCropMarginsYMax</tabstop>
-  <tabstop>paramMarkingsLineEdit</tabstop>
+  <tabstop>logTextEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>
