@@ -4,7 +4,7 @@ from subprocess import call
 from time import gmtime, strftime
 
 import deeplabcut
-from yaml_helper import yaml_read_dict, yaml_write_dict
+from src.yaml_helper import yaml_read_dict, yaml_write_dict
 
 
 
@@ -47,7 +47,7 @@ def dlcCreateCheckLabels(configpath):
     # FIXME: QT application SEGFAULTS on exit of wxPython app, I have no clue why.
     #   So far I run it as a separate process, but would be good to fix
     #   It appears that it is in general hard to make a GUI run not from the main thread
-    call([sys.executable, "dlc_wx_hotfix.py", configpath])
+    call([sys.executable, os.path.join("src/", "dlc_wx_hotfix.py"), configpath])
     #deeplabcut.label_frames(configpath)
 
     # this creates a subdirectory with the frames + your labels

@@ -1,9 +1,41 @@
-# TODO: Allow import existing project and skip params part
-# TODO: add @pyqtSlot() decorator to all methods implementing the log write
-# TODO: Pass all logging output through myReceiver to avoid threading problems
-# TODO: Disable GUI every time a long process is started
-# TODO: Ensure all threads exit normally
-# TODO: Ensure stderr is also ported to logbox correctly
+################ BUGS ###############################################
+# TODO: !5!  Ensure all threads exit normally
+
+# TODO: !4!  Disable GUI every time a long process is started
+# TODO: !4!  LOG - is there something besides stdout and stderr???
+# TODO: !4!  LOG - Pass QThread logging output through same myReceiver mechanism
+
+# TODO:  !3!  Logbox - write-in-place, move cursor to the bottom when writing. Maybe write to DLC, ask why are iterations written to stderr
+# FIXME: !3!  (python3:15705): GLib-GIO-WARNING **: 13:50:50.920: unknown schema extension 'd'
+# FIXME: !3!  Gtk-Message: 13:50:50.957: GtkDialog mapped without a transient parent. This is discouraged.
+# FIXME: !3!  add @pyqtSlot() decorator to all methods implementing the log write
+
+################# Features ###########################################
+
+# Interface
+# TODO: !5!  Import existing project, skip params part
+# TODO: !3!  OpenFileDialog - Starting directory = local project path or video path, depends which more relevant
+
+# REMOTE - Training
+# TODO: !4!  REMOTE - Open remote project path
+# TODO: !4!  REMOTE - Open remote original video path (on the network drive)
+# TODO: !4!  REMOTE - SCP local project to remote (if already exists, add version label)
+# TODO: !4!  REMOTE - Start docker
+# TODO: !4!  REMOTE - Run training
+# TODO: !4!  REMOTE - Run testing
+# REMOTE - Analysis
+# TODO: !4!  REMOTE - Open remote project path and video path, unless already opened
+# TODO: !4!  REMOTE - Run marking
+# TODO: !4!  REMOTE - Save marked video on the network
+# TODO: !4!  REMOTE - SCP marking results to the network
+
+# LOCAL - POSTPROCESS
+# TODO: !4! LOCAL - Get path to tracked video and marked results
+# TODO: !4! LOCAL - Apply Confidence filter and distance filter, select bad frames
+# TODO: !4! LOCAL - Cluster bad frames
+# TODO: !4! LOCAL - Mark bad frames
+# TODO: !4! LOCAL - Update local folder structure, such that training steps can be re-done
+
 
 
 #######################################################
@@ -28,10 +60,7 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
 
 # Matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 import matplotlib.image as mpimg
-# from matplotlib.backends.qt_compat import QtCore, QtWidgets, is_pyqt5
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
 # Append base directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -39,13 +68,13 @@ sys.path.insert(0, dir_path)
 print("Appended base directory", dir_path)
 
 # Local libraries
-from dlc_serv_gui.dlcgui import Ui_dlcgui
-from ssh_helper import sshConnectExec1
-from opencv_helper import getVideoShape
-from yaml_helper import yaml_read_dict, yaml_write_dict
-from qt_helper import updateComboBoxByValue
-from qthread_helper import WriteStream, createRunThread, MyReceiver, ObjectFunction
-from dlc_helper import dlcSampleImages, dlcCreateCheckLabels, dlcCreateTrainingSet
+from gui.dlcgui import Ui_dlcgui
+from src.ssh_helper import sshConnectExec1
+from src.opencv_helper import getVideoShape
+from src.yaml_helper import yaml_read_dict, yaml_write_dict
+from src.qt_helper import updateComboBoxByValue, embedQTPlot
+from src.qthread_helper import WriteStream, createRunThread, MyReceiver, ObjectFunction
+from src.dlc_helper import dlcSampleImages, dlcCreateCheckLabels, dlcCreateTrainingSet
 
 #######################################################
 # Main Window
@@ -95,21 +124,6 @@ class DLC_SERV_GUI () :
 
         # Train->Connect
         self.gui.connectConnectButton.clicked.connect(lambda: self.connectServ())
-
-
-        # Create canvas for checking
-        self.checkCanvasFig = plt.figure()
-        self.checkStaticCanvas = FigureCanvasQTAgg(self.checkCanvasFig)  # figsize=(5, 3)
-        self.gui.checkCanvasLayout.addWidget(self.checkStaticCanvas)
-        self.checkStaticCanvas.draw()
-        toolbar = NavigationToolbar2QT(self.checkStaticCanvas, self.gui.checkCanvasWidget, coordinates=True)
-        self.gui.checkCanvasLayout.addWidget(toolbar)
-        #self.checkStaticAxis = self.checkStaticCanvas.figure.subplots()
-
-        # self.checkDynamicCanvas = FigureCanvas(Figure()) # figsize=(5, 3)
-        # self.gui.checkCanvasLayout.addWidget(self.checkDynamicCanvas)
-        # self.addToolBar(QtCore.Qt.BottomToolBarArea, NavigationToolbar2QT(self.checkDynamicCanvas, self))
-        # self.checkDynamicAxis = self.checkDynamicCanvas.figure.subplots()
 
 
     # Destructor
@@ -225,6 +239,7 @@ class DLC_SERV_GUI () :
 
         # Create a new DeepLabCut project
         self.writeLog("DeepLabCut is creating a project", self.logparam["action"])
+        # dlcSampleImages(self.metadata)
         self.dlc_sample_obj = ObjectFunction(lambda : dlcSampleImages(self.metadata))
         self.dlc_create_thread = createRunThread(self.dlc_sample_obj)
     
@@ -232,6 +247,7 @@ class DLC_SERV_GUI () :
     # Start wxPython GUI to mark frames
     def paramsGUIMark(self):
         self.writeLog("Mark frames using wxPython interface", self.logparam["action"])
+        # dlcCreateCheckLabels(self.metadata["path"]["configfile"])
         self.dlc_mark_check_obj = ObjectFunction(lambda : dlcCreateCheckLabels(self.metadata["path"]["configfile"]))
         self.dlc_mark_check_thread = createRunThread(self.dlc_mark_check_obj)
 
@@ -241,6 +257,7 @@ class DLC_SERV_GUI () :
     # Locate and import marked images into check tab
     def paramsCreateTrainingSet(self):
         self.writeLog("DeepLabCut is creating a training set", self.logparam["action"])
+        # dlcCreateTrainingSet(self.metadata["path"]["configfile"])
         self.dlc_create_training_obj = ObjectFunction(lambda : dlcCreateTrainingSet(self.metadata["path"]["configfile"]))
         self.dlc_create_training_thread = createRunThread(self.dlc_create_training_obj)
 
@@ -268,12 +285,20 @@ class DLC_SERV_GUI () :
         imageIdx = self.gui.checkFrameSlider.value()
         img = mpimg.imread(self.metadata["path"]["checkimages"][imageIdx])
         if init:
-            plt.figure(self.checkCanvasFig.number)
+            # Embed a matplotlib plot into QT form
+            self.checkFrameFig, self.checkFrameCanvas = embedQTPlot(self.gui.checkCanvasLayout, self.gui.checkCanvasWidget)
+
+            # Display an image on the embedded figure
+            plt.figure(self.checkFrameFig.number)
             self.checkCurrentImage = plt.imshow(img)
             plt.axis('off')
         else:
+            # Update image on the embedded figure
+            plt.figure(self.checkFrameFig.number)
             self.checkCurrentImage.set_data(img)
-        self.checkStaticCanvas.draw()
+
+        # Display results by updating canvas
+        self.checkFrameCanvas.draw()
 
 
     # Connect to server using parameters from GUI, attempt to run nvidia-smi there
@@ -299,11 +324,15 @@ if __name__ == '__main__' :
 
     # Create Queue and redirect sys.stdout to this queue
     logOutQueue = Queue()
+    logErrQueue = Queue()
     sys.stdout = WriteStream(logOutQueue)
+    sys.stderr = WriteStream(logErrQueue)
 
     # Create thread that will listen on the other end of the queue, and send the text to the textedit in our application
-    receiverObj = MyReceiver(logOutQueue, lambda text: pth1.writeLog(text, pth1.logparam["output"]))
-    receiverThread = createRunThread(receiverObj)
+    receiverObjOut = MyReceiver(logOutQueue, lambda text: pth1.writeLog(text, pth1.logparam["output"]))
+    receiverObjErr = MyReceiver(logErrQueue, lambda text: pth1.writeLog(text, pth1.logparam["error"]))
+    receiverThreadOut = createRunThread(receiverObjOut)
+    receiverThreadErr = createRunThread(receiverObjErr)
 
     mainwindow.show()
     sys.exit(app.exec_())
