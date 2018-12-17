@@ -1,0 +1,19 @@
+# Create credentials file
+/home/username/.smbcredentials
+
+# Add lines
+username=aaa
+password=bbb
+
+# Hide the file from other people
+chmod 600 .smbcredentials 
+
+# Make new folder to mount
+sudo mkdir /media/myhappymountservername
+
+# Add line to /etc/fstab for autoboot
+//130.60.51.7/neurophysiology /media/samba/neurophysiology cifs auto,user,rw,workgroup=HIFO,iocharset=utf8,credentials=/home/alfomi/.smbcredentials 0 0
+
+# Execute command to apply lines of /etc/fstab directly
+sudo mount -a
+
