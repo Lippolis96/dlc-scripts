@@ -43,6 +43,14 @@ Install-Docker:
 6. Install DLC Docker
   https://github.com/AlexEMG/Docker4DeepLabCut
 
+-----------------------
+Running docker:
+-----------------------
+  GPU=0 bash ./dlc-docker run -d -p 2351:8888 -e USER_HOME=$HOME/work/DLC_DOCKER --name containername mydlcuser:mydlcdocker
+  docker stop containername  # Stop a container
+  docker rm containername    # Remove a container
+  docker container prune     # Stop all running containers
+
 
 Problems:
 * "nvidia-docker" does not have installation candidate for Ubuntu 18.04, only 16.04
