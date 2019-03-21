@@ -10,4 +10,10 @@ import deeplabcut
 with open('settings.json') as json_file:  
     settings = json.load(json_file)
     
-deeplabcut.analyze_videos(settings['pwd_config'], settings['pwd_videos'])
+print("Gonna track videos:", settings['pwd_videos'])
+
+#dest_folder = "/home/hpc_user/projects-dlc/dlc-scripts/results/"
+
+deeplabcut.analyze_videos(settings['pwd_config'], settings['pwd_videos'], save_as_csv=True)
+
+#deeplabcut.create_labeled_video(settings['pwd_config'], settings['pwd_videos'])
