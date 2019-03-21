@@ -1,9 +1,10 @@
 import os
-import json
-import deeplabcut
 
 # Disable GUI
 os.environ["DLClight"]="True"
+
+import json
+import deeplabcut
 
 # Load videos and config file
 with open('settings.json') as json_file:  
