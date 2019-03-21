@@ -47,6 +47,8 @@ Install-Docker:
 Running docker:
 -----------------------
   GPU=0 bash ./dlc-docker run -d -p 2351:8888 -e USER_HOME=$HOME/work/DLC_DOCKER --name containername mydlcuser:mydlcdocker
+  docker exec --user $USER -it containername /bin/bash
+  docker logs containername
   docker stop containername  # Stop a container
   docker rm containername    # Remove a container
   docker container prune     # Stop all running containers
