@@ -8,6 +8,7 @@ import yaml
 import pathlib
 import h5py
 import pandas as pd
+import copy
 
 pwd_project = sys.argv[1]
 
@@ -68,29 +69,44 @@ for dirpath, dirnames, filenames in os.walk(pwd_labeled):
 ##################################
 #  Marking h5 paths
 ##################################
-#print('Editing paths in .h5 marking files')
-#pwd_labeled = os.path.join(pwd_project, 'labeled-data')
-#for dirpath, dirnames, filenames in os.walk(pwd_labeled):
-    #for filename in [f for f in filenames if f.endswith(".h5")]:
-        #h5_fname = os.path.join(dirpath, filename)
-        #print("Fixing file", h5_fname)
+print('Editing paths in .h5 marking files')
+pwd_labeled = os.path.join(pwd_project, 'labeled-data')
+for dirpath, dirnames, filenames in os.walk(pwd_labeled):
+    for filename in [f for f in filenames if f.endswith(".h5")]:
+        h5_fname = os.path.join(dirpath, filename)
+        print("Fixing file", h5_fname)
         
         #h5_df = pd.read_hdf(h5_fname, 'df_with_missing')
-        #print(h5_df.keys())
         
-        ##h5_df.to_hdf(h5_fname, 'df_with_missing', format='table', mode='w')
+        #for key in h5_df.keys():
+            #keynames = list(h5_df[key].keys())
+            
+            #for keyname in keynames:
+                #h5_df[key].rename(index=str, columns={keyname: keyname.replace('\\', '/')})
+            
+            #print(h5_df[key].keys())
+            ##for key2 in h5_df[key].keys():
+                ##print(key2)
+        #print(h5_df.values())
         
-        ##h5f = h5py.File(h5_fname, 'r+')
-        ##sub = h5f['df_with_missing']
+        #h5_df.to_hdf(h5_fname, 'df_with_missing', format='table', mode='w')
         
-        ##data_h5 = list(sub['table'])
-        ##data_h5 = [(line[0].decode('UTF-8').replace('\\', '/').encode(), line[1]) for line in data_h5]
-        ##sub['table'] = data_h5
-        ##h5f.close()
+        h5f = h5py.File(h5_fname, 'r+')
+        sub = h5f['df_with_missing']
+        table = sub['table'][...]
+        
+        for i in range(len(table)):
+            table[i][0] = table[i][0].decode('UTF-8').replace('\\', '/').encode()
+            print(table[i][0])
+        
+        #data_h5 = list(sub['table'])
+        #data_h5 = [(line[0].decode('UTF-8').replace('\\', '/').encode(), line[1]) for line in data_h5]
+        sub['table'][...] = table
+        h5f.close()
         
         
-        ##for line in data_h5:
-            ##print(line)
-            ###print([line[0].decode('UTF-8').replace('\\', '/')] + line[1:])
+        #for line in data_h5:
+            #print(line)
+            ##print([line[0].decode('UTF-8').replace('\\', '/')] + line[1:])
 
         
