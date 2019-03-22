@@ -1,0 +1,11 @@
+
+
+If permission denied when downloading ResNet:
+Download them manually:
+  cd /usr/local/lib/python3.6/dist-packages/deeplabcut/pose_estimation_tensorflow/models/pretrained
+  sudo chmod +x download.sh
+  sudo ./download.sh
+  sudo chown hpc_user:hpc_user resnet_v1_*
+
+
+
