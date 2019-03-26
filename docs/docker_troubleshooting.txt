@@ -1,4 +1,8 @@
-
+How to mount new volume on Docker
+* Edit dlc-docker inside Docker source code
+* Add new variable mypath
+* To the docker run command inside script, add "-v $mypath:mypath"
+* "-v" command can be repeated multiple times for different variables
 
 If permission denied when downloading ResNet:
 Download them manually:
