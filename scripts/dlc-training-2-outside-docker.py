@@ -76,37 +76,50 @@ for dirpath, dirnames, filenames in os.walk(pwd_labeled):
         h5_fname = os.path.join(dirpath, filename)
         print("Fixing file", h5_fname)
         
-        #h5_df = pd.read_hdf(h5_fname, 'df_with_missing')
+        h5_df = pd.read_hdf(h5_fname, 'df_with_missing')
+
+        # Rename all indices
+        h5_df.index = pd.Index([idx.replace('\\', '/') for idx in h5_df.index])
         
+        print(h5_df.index)
+        
+        
+        #print(h5_df.keys())
         #for key in h5_df.keys():
-            #keynames = list(h5_df[key].keys())
+            #for keyname in list(h5_df[key].keys()):
+                #newkeyname = keyname.replace('\\', '/')
+                
+                ## Add transformed keys
+                #h5_df[key][newkeyname] = h5_df[key][keyname]
+                
+                ## Delete old keys
+                #del h5_df[key][keyname]
             
-            #for keyname in keynames:
-                #h5_df[key].rename(index=str, columns={keyname: keyname.replace('\\', '/')})
+        #for key in h5_df.keys():
+            #print(h5_df[key])
+        
+        # Save edited dataframe back
+        h5_df.to_hdf(h5_fname, 'df_with_missing', format='table', mode='w')
+            
+
             
             #print(h5_df[key].keys())
-            ##for key2 in h5_df[key].keys():
-                ##print(key2)
+            #for key2 in h5_df[key].keys():
+                #print(key2)
         #print(h5_df.values())
         
         #h5_df.to_hdf(h5_fname, 'df_with_missing', format='table', mode='w')
         
-        h5f = h5py.File(h5_fname, 'r+')
-        sub = h5f['df_with_missing']
-        table = sub['table'][...]
+        #h5f = h5py.File(h5_fname, 'r+')
+        #sub = h5f['df_with_missing']
+        #table = sub['table'][...]
+        ##del h5f['df_with_missing/table']
         
-        for i in range(len(table)):
-            table[i][0] = table[i][0].decode('UTF-8').replace('\\', '/').encode()
-            print(table[i][0])
+        #for i in range(len(table)):
+            #table[i][0] = table[i][0].decode('UTF-8').replace('\\', '/').encode()
+            #print(table[i][0])
         
-        #data_h5 = list(sub['table'])
-        #data_h5 = [(line[0].decode('UTF-8').replace('\\', '/').encode(), line[1]) for line in data_h5]
-        sub['table'][...] = table
-        h5f.close()
-        
-        
-        #for line in data_h5:
-            #print(line)
-            ##print([line[0].decode('UTF-8').replace('\\', '/')] + line[1:])
+        #sub['table'][...] = table
+        #h5f.close()
 
         
