@@ -49,7 +49,14 @@ inputpath = sys.argv[1]
 path = os.path.abspath(os.path.join(inputpath, os.pardir))
 # localFolder = os.path.basename(os.path.dirname(inputpath))
 localFolder = os.path.basename(inputpath)
-outputpath = os.path.join(path, localFolder + "_compressed")
+
+
+if len(sys.argv) < 3:
+  outputpath = os.path.join(path, localFolder + "_compressed")
+else:
+  outputpath = os.path.join(sys.argv[2], localFolder + "_compressed")
+
+
 
 print("Copying structure from")
 print("  ", inputpath)
