@@ -1,7 +1,10 @@
+import numpy as np
+
 # Find all nodes with too low likelihood
 def likelihood_constrain(P, param):
+    nFrames, nNodes = P.shape
     perr = 1 - P
-    return perr, np.array([perr[:, i] > pthr for i, pthr in enumerate(param["LIKELIHOOD_THR"])]).transpose()
+    return perr, np.greater(perr, param["LIKELIHOOD_THR"])
 
 # Find all nodes with too high velocity
 def velocity_constrain(X, Y, nodeLowConf, param):
@@ -14,7 +17,8 @@ def velocity_constrain(X, Y, nodeLowConf, param):
     VLowConf = np.logical_or(nodeLowConf[1:], nodeLowConf[:-1])
     
     # Compute velocities that exceed respective thresholds
-    nodeBadV = np.array([V[:, i] > vmax for i, vmax in enumerate(param["NODE_MAX_V"])]).transpose()
+    nodeBadV = np.greater(V - param["NODE_MAX_V"], 0)
+    #np.array([V[:, i] > vmax for i, vmax in enumerate(param["NODE_MAX_V"])]).transpose()
 
     # Ignore low confidence velocities, as they are a priori non-informative
     nodeBadV[VLowConf] = False
@@ -34,7 +38,7 @@ def velocity_constrain(X, Y, nodeLowConf, param):
 
 # Compute edge length, and mark nodes as bad if their length is too low/high
 def edge_constrain(X, Y, nodeLowConf, param):
-    nRows = x.shape[0]
+    nRows, nNodes = X.shape
     nEdges = len(param['EDGE_NODES'])
     edgeLength = np.zeros((nRows, nEdges))
     edgeLowConf = np.zeros((nRows, nEdges), dtype=bool)
@@ -52,8 +56,8 @@ def edge_constrain(X, Y, nodeLowConf, param):
         edgeLenAvg = np.mean(edgeLength[:, iEdge])
         
         # Mark edges as bad if relative length is too low/high
-        edgeTooSmall = DL < rMin * edgeLenAvg
-        edgeTooLarge = DL > rMax * edgeLenAvg
+        edgeTooSmall = np.less(edgeLength[:, iEdge], rMin * edgeLenAvg)
+        edgeTooLarge = np.greater(edgeLength[:, iEdge], rMax * edgeLenAvg)
         edgeBadLength[:, iEdge] = np.logical_or(edgeTooSmall, edgeTooLarge)
         
         # Filter out only edges that are confident

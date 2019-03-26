@@ -12,7 +12,7 @@ def parse_dlc_csv(fname, param):
     data = np.array([line.strip().split(',') for line in lines[3:]]).astype(float)
     # df = pd.read_csv(dataFileName, sep=',', header=None, dtype=float, skiprows=3)
     # print("Data shape is", data.shape)
-    nNodes = len(temp_dict['NODE_NAMES'])
+    nNodes = len(param['NODE_NAMES'])
     # nRows = data.shape[0]
 
     # Extract column positions from header
@@ -22,7 +22,7 @@ def parse_dlc_csv(fname, param):
     colY = np.zeros(nNodes, dtype=int)
     colP = np.zeros(nNodes, dtype=int)
     for i in range(nNodes):
-        thiscols = bodyparts == temp_dict['NODE_NAMES'][i]
+        thiscols = bodyparts == param['NODE_NAMES'][i]
         colX[i] = np.where(np.logical_and(thiscols, properties == 'x'))[0]
         colY[i] = np.where(np.logical_and(thiscols, properties == 'y'))[0]
         colP[i] = np.where(np.logical_and(thiscols, properties == 'likelihood'))[0]
