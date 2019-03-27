@@ -16,7 +16,7 @@ def plotPerrCDF(ax, perr, param):
     
 # Find all nodes for which velocity is confident, plot velocity CDF
 def plotVelocityCDF(ax, V, VLowConf, param):
-    nRows, nNodes = convV.shape
+    nRows, nNodes = V.shape
     frameCDF = np.linspace(nRows, 1, nRows)
     
     for iNode in range(nNodes):
