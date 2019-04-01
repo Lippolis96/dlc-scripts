@@ -1,7 +1,8 @@
 import numpy as np
 # import pandas as pd
+from collections import OrderedDict
 
-def parse_dlc_csv(fname, param):
+def parse_dlc_csv(fname):
     
     # Read file
     f = open(fname, 'r')
@@ -9,10 +10,11 @@ def parse_dlc_csv(fname, param):
     f.close()
 
     # Parse CSV data
+    nodeNames = list(OrderedDict.fromkeys(lines[1].strip().split(',')[1:]))
     data = np.array([line.strip().split(',') for line in lines[3:]]).astype(float)
     # df = pd.read_csv(dataFileName, sep=',', header=None, dtype=float, skiprows=3)
     # print("Data shape is", data.shape)
-    nNodes = len(param['NODE_NAMES'])
+    nNodes = len(nodeNames)
     # nRows = data.shape[0]
 
     # Extract column positions from header
@@ -22,9 +24,9 @@ def parse_dlc_csv(fname, param):
     colY = np.zeros(nNodes, dtype=int)
     colP = np.zeros(nNodes, dtype=int)
     for i in range(nNodes):
-        thiscols = bodyparts == param['NODE_NAMES'][i]
+        thiscols = bodyparts == nodeNames[i]
         colX[i] = np.where(np.logical_and(thiscols, properties == 'x'))[0]
         colY[i] = np.where(np.logical_and(thiscols, properties == 'y'))[0]
         colP[i] = np.where(np.logical_and(thiscols, properties == 'likelihood'))[0]
         
-    return data[:, colX], data[:, colY], data[:, colP]
+    return nodeNames, data[:, colX], data[:, colY], data[:, colP]
