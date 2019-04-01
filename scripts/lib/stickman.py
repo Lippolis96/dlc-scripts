@@ -28,6 +28,7 @@ TODO-EXTENSIONS:
 '''
 
 import os
+import numpy as np
 import cv2
 
 def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edgeLowConstr=None):
@@ -41,7 +42,6 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
     frameShape = (
         int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), 
         int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    capture.release()
     
     ############################################
     # Define Constants
@@ -58,6 +58,7 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
         int(X[iFrame, iNode] - FRAME_X_LIM[0]),
         int(Y[iFrame, iNode] - FRAME_Y_LIM[0]))
     
+    nRows, nNodes = X.shape
     haveNodeConstr = nodeLowConstr is not None
     haveEdges      = edgeLowConf   is not None
     haveEdgeConstr = edgeLowConstr is not None
@@ -68,14 +69,22 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    outName = os.path.join(param["REZ_FPATH"], "stickman.avi")
+    
+    
+    outName = os.path.join(param["REZ_FPATH"], os.path.basename(param["AVI_FNAME"])[:-4] + "-stickman.avi")
     outWriter = cv2.VideoWriter(outName, fourcc, fps, frameShape, isColor=True)
 
     for iFrame in range(nRows):
         print("Writing video ["+str(iFrame+1)+'/'+str(nRows)+']\r', end="")
 
         # Note CV2 column-major
-        pic = np.zeros((frameShape[1], frameShape[0], 3), dtype=np.uint8)
+        if param["STICKMAN_OVERLAY"]:
+            success, pic = capture.read()
+        else:
+            pic = np.zeros((frameShape[1], frameShape[0], 3), dtype=np.uint8)
+        
+        
+        
 
         # ------------Draw Nodes----------------
         # If Node has high confidence, draw it
@@ -91,13 +100,14 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
         # If Edge has high confidence, draw it
         # Change color if edge has bad length
         if haveEdges:
+            nEdges = len(param['EDGE_NODES'])
             for iEdge in range(nEdges):
                 p1idx, p2idx = param['EDGE_NODES'][iEdge]
 
                 if not edgeLowConf[iFrame, iEdge]:
                     p1 = pointLocalCoord(iFrame, p1idx)
                     p2 = pointLocalCoord(iFrame, p2idx)
-                    badEdge = haveEdgeConstr and edgeLowConstr[iFrame, iNode]
+                    badEdge = haveEdgeConstr and edgeLowConstr[iFrame, iEdge]
                     color = COLOR_RED if badEdge else COLOR_GREEN
                     pic = cv2.line(pic, p1, p2, COLOR_GREEN, 2)
 
@@ -110,6 +120,7 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
         # plt.show()
 
     # Release everything if job is finished
+    capture.release()
     outWriter.release()
     cv2.destroyAllWindows()
 

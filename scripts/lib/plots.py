@@ -17,10 +17,10 @@ def plotPerrCDF(ax, perr, param):
 # Find all nodes for which velocity is confident, plot velocity CDF
 def plotVelocityCDF(ax, V, VLowConf, param):
     nRows, nNodes = V.shape
-    frameCDF = np.linspace(nRows, 1, nRows)
     
     for iNode in range(nNodes):
         VConf = V[np.logical_not(VLowConf[:, iNode]), iNode]
+        frameCDF = np.linspace(len(VConf), 1, len(VConf))
         ax.semilogy(np.sort(VConf), frameCDF, label=param['NODE_NAMES'][iNode])
 
     ax.set_xlabel("velocity in pixel")
@@ -34,7 +34,8 @@ def plotRelEdgeLenDistr(ax, edgeLength, edgeLowConf, param):
     for iEdge in range(nEdges):
         edgeLenConf = edgeLength[np.logical_not(edgeLowConf[:, iEdge]), iEdge]
         edgeLenAvg = np.mean(edgeLenConf)
-        ax.semilogy(edgeLenConf / edgeLenAvg, label=str(iEdge))
+        label = param['NODE_NAMES'][iEdge] + '-' + param['NODE_NAMES'][iEdge+1]
+        ax.plot(edgeLenConf / edgeLenAvg, label=label)
     
     ax.set_xlabel("frame index")
     ax.set_ylabel("Relative joint length")
