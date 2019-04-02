@@ -2,9 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class DraggableCircle:
-    def __init__(self, circle):
+    def __init__(self, circle, triggerOnRelease=None, triggerOnRightClick=None):
         self.circle = circle
         self.press_shift = None
+        self.triggerOnRelease = triggerOnRelease
+        self.triggerOnRightClick = triggerOnRightClick
 
         #connect to all the events we need
         self.cidpress   = self.circle.figure.canvas.mpl_connect('button_press_event', self.on_press)
@@ -14,15 +16,13 @@ class DraggableCircle:
     # on button press we will see if the mouse is over us and store some data
     def on_press(self, event):
         if event.inaxes != self.circle.axes:
-            print("yolo")
             return
 
         contains, attrd = self.circle.contains(event)
         if not contains:
-            print("lolo")
             return
         
-        print('event contains', self.circle.center)
+        # print('event contains', self.circle.center)
         self.press_shift = np.array(self.circle.center) - np.array((event.xdata, event.ydata))
 
     # on motion we will move the circle if the mouse is over us
@@ -35,25 +35,21 @@ class DraggableCircle:
 
     # on release we reset the press data
     def on_release(self, event):  
-        self.press_shift = None
-        self.circle.figure.canvas.draw()
+        if self.press_shift is not None:
+            self.press_shift = None
+            if event.button==1:
+                print("New coordinates are", self.circle.center)
+                if self.triggerOnRelease is not None:
+                    self.triggerOnRelease(self.circle.center)
+                self.circle.figure.canvas.draw()
+            elif event.button==3 and self.triggerOnRightClick is not None:
+                print("Setting point as bad")
+                # Double-click event - special reaction
+                self.triggerOnRightClick(self.circle.center)
+                self.circle.figure.canvas.draw()
 
     # disconnect all the stored connection ids
     def disconnect(self):
         self.circle.figure.canvas.mpl_disconnect(self.cidpress)
         self.circle.figure.canvas.mpl_disconnect(self.cidrelease)
         self.circle.figure.canvas.mpl_disconnect(self.cidmotion)
-
-#fig, ax = plt.subplots()
-#ax.set_xlim(0, 100)
-#ax.set_ylim(0, 100)
-#circles = [plt.Circle(np.random.uniform(0, 100, 2), 5, color='lightgreen') for i in range(20)]
-#for circle in circles:
-    #ax.add_artist(circle)
-
-#drs = []
-#for circle in circles:
-    #dr = DraggableCircle(circle)
-    #drs.append(dr)
-
-#plt.show()
