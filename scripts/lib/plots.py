@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plotPerrCDF(ax, perr, param):
-    nRows, nNodes = perr.shape
-    frameCDF = np.linspace(nRows, 1, nRows)
+    nFrames, nNodes = perr.shape
+    frameCDF = np.linspace(nFrames, 1, nFrames)
     
     for iNode in range(nNodes):
         label = param['NODE_NAMES'][iNode]
@@ -16,7 +16,7 @@ def plotPerrCDF(ax, perr, param):
     
 # Find all nodes for which velocity is confident, plot velocity CDF
 def plotVelocityCDF(ax, V, VLowConf, param):
-    nRows, nNodes = V.shape
+    nFrames, nNodes = V.shape
     
     for iNode in range(nNodes):
         VConf = V[np.logical_not(VLowConf[:, iNode]), iNode]
@@ -29,14 +29,27 @@ def plotVelocityCDF(ax, V, VLowConf, param):
 
 # Find all confident edges, plot their relative length distribution
 def plotRelEdgeLenDistr(ax, edgeLength, edgeLowConf, param):
-    nRows, nEdges = edgeLength.shape
+    nFrames, nEdges = edgeLength.shape
     
+    frameIdxs = np.linspace(0, nFrames-1, nFrames)
     for iEdge in range(nEdges):
-        edgeLenConf = edgeLength[np.logical_not(edgeLowConf[:, iEdge]), iEdge]
-        edgeLenAvg = np.mean(edgeLenConf)
+        selectedFrames = np.logical_not(edgeLowConf[:, iEdge])
+        edgeLenConf = edgeLength[selectedFrames, iEdge]
+        frameIdxsThis = frameIdxs[selectedFrames]
         label = param['NODE_NAMES'][iEdge] + '-' + param['NODE_NAMES'][iEdge+1]
-        ax.plot(edgeLenConf / edgeLenAvg, label=label)
+        ax.plot(frameIdxsThis, edgeLenConf / np.mean(edgeLenConf), label=label)
     
     ax.set_xlabel("frame index")
     ax.set_ylabel("Relative joint length")
     ax.legend()
+    
+def plotLowConf(ax, nodeLowConf, param):
+    nFrames, nNodes = nodeLowConf.shape
+    
+    for iNode in range(nNodes):
+        ax.plot(0.5*nodeLowConf[:, iNode] + nNodes-iNode-1, label=param['NODE_NAMES'][iNode])
+        
+    ax.get_yaxis().set_visible(False)
+    ax.set_xlabel("frame index")
+    ax.set_ylabel("Labels")
+    #ax.legend()

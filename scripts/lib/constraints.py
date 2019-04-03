@@ -8,7 +8,7 @@ def likelihood_constrain(P, param):
 
 # Find all nodes with too high velocity
 def velocity_constrain(X, Y, nodeLowConf, param):
-    nRows, nNodes = X.shape
+    nFrames, nNodes = X.shape
     
     # Velocity
     V = np.sqrt((X[1:] - X[:-1])**2 + (Y[1:] - Y[:-1])**2)
@@ -29,7 +29,7 @@ def velocity_constrain(X, Y, nodeLowConf, param):
     # 1) Next velocity is normal, and
     # 2) At least two velocities in a row were abnormal
     for iNode in range(nNodes):
-        for iFrame in range(3, nRows):
+        for iFrame in range(3, nFrames):
             if nodeBadV[iFrame-2, iNode] and nodeBadV[iFrame-1, iNode] and not nodeBadV[iFrame, iNode]:
                 nodeBadV[iFrame-1, iNode] = False
                 
@@ -38,11 +38,11 @@ def velocity_constrain(X, Y, nodeLowConf, param):
 
 # Compute edge length, and mark nodes as bad if their length is too low/high
 def edge_constrain(X, Y, nodeLowConf, param):
-    nRows, nNodes = X.shape
+    nFrames, nNodes = X.shape
     nEdges = len(param['EDGE_NODES'])
-    edgeLength = np.zeros((nRows, nEdges))
-    edgeLowConf = np.zeros((nRows, nEdges), dtype=bool)
-    edgeBadLength = np.zeros((nRows, nEdges), dtype=bool)
+    edgeLength = np.zeros((nFrames, nEdges))
+    edgeLowConf = np.zeros((nFrames, nEdges), dtype=bool)   # Edge is low-confident if at least one point is low-confident
+    edgeBadLength = np.zeros((nFrames, nEdges), dtype=bool) # Edge is bad if its length is too big or too small
     
     for iEdge in range(nEdges):
         p1idx, p2idx = param['EDGE_NODES'][iEdge]
@@ -60,8 +60,8 @@ def edge_constrain(X, Y, nodeLowConf, param):
         edgeTooLarge = np.greater(edgeLength[:, iEdge], rMax * edgeLenAvg)
         edgeBadLength[:, iEdge] = np.logical_or(edgeTooSmall, edgeTooLarge)
         
-        # Filter out only edges that are confident
+        # # Filter out only edges that are confident
         edgeLowConf[:, iEdge] = np.logical_or(nodeLowConf[:, p1idx], nodeLowConf[:, p2idx])
-        edgeBadLength[edgeLowConf[:, iEdge], iEdge] = False
+        # edgeBadLength[edgeLowConf[:, iEdge], iEdge] = False
 
     return edgeLength, edgeLowConf, edgeBadLength
