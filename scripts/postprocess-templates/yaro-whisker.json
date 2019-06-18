@@ -1,0 +1,6 @@
+{
+  "NODE_NAMES"       : ["Nose", "Base1", "Base2", "Tip1", "Tip2", "Touch"],
+  "NODE_MAX_V"       : [200, 200, 200, 200, 200, 200],
+  "LIKELIHOOD_THR"   : 0.05,
+  "STICKMAN_OVERLAY" : true
+}
