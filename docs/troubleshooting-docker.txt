@@ -1,0 +1,18 @@
+--------------------------
+How to restart docker:
+--------------------------
+1) run all lines inside "start_docker.sh" one by one. Just running the script does not work for unknown reason
+2) Manually download ResNets, as DLC does not do it by default :(
+  cd /usr/local/lib/python3.6/dist-packages/deeplabcut/pose_estimation_tensorflow/models/pretrained
+  sudo chmod +x download.sh
+  sudo ./download.sh
+  sudo chown hpc_user:hpc_user resnet_v1_*
+
+----------------------------
+How to mount an extra drive that is not already mounted inside docker
+----------------------------
+
+1. Edit dlc-docker inside Docker source code
+  * Add new variable "mypath" or sth with path to remote folder
+  * To the docker run command inside script, add "-v $mypath:mypath"
+  * "-v" command can be repeated multiple times for different variables, one after another separated by space

@@ -31,8 +31,9 @@ import os
 import numpy as np
 import cv2
 
-def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edgeLowConstr=None):
-    
+
+def stickman(X, Y, param, constr_dict):
+
     ############################################
     # Extract video properties from original
     ############################################
@@ -51,17 +52,33 @@ def stickman(X, Y, param, nodeLowConf, nodeLowConstr=None, edgeLowConf=None, edg
     COLOR_GREEN = (0, 255, 0)
     COLOR_BLUE = (0, 0, 255)
   
-    FRAME_X_LIM = [0, frameShape[0]] if param["STICKMAN_CROP_X"] is None else param["STICKMAN_CROP_X"]
-    FRAME_Y_LIM = [0, frameShape[1]] if param["STICKMAN_CROP_Y"] is None else param["STICKMAN_CROP_Y"]
+    FRAME_X_LIM = param["STICKMAN_CROP_X"] if "STICKMAN_CROP_X" in param.keys() else [0, frameShape[0]]
+    FRAME_Y_LIM = param["STICKMAN_CROP_Y"] if "STICKMAN_CROP_Y" in param.keys() else [0, frameShape[1]]
 
     pointLocalCoord = lambda iFrame, iNode: (
         int(X[iFrame, iNode] - FRAME_X_LIM[0]),
         int(Y[iFrame, iNode] - FRAME_Y_LIM[0]))
     
     nRows, nNodes = X.shape
-    haveNodeConstr = nodeLowConstr is not None
-    haveEdges      = edgeLowConf   is not None
-    haveEdgeConstr = edgeLowConstr is not None
+
+    
+    ############################################
+    # Check constraints
+    ############################################
+    # Use velocity as node constraint for stickman plot.
+    nodeLowConf = constr_dict["nodeLowConf"]
+    haveNodeConstr = param["HAVE_V_CONSTR"]
+    if haveNodeConstr:
+        nodeLowConstr = np.copy(constr_dict["nodeBadV1"])
+        
+    # Use edge length as edge constraint for stickman plot
+    haveEdges      = "EDGE_NODES" in param.keys()
+    haveEdgeConstr = param['HAVE_EDGE_CONSTR']
+    if haveEdges:
+        edgeLowConf = constr_dict["edgeLowConf"]
+    if haveEdgeConstr:
+        edgeLowConstr = np.copy(constr_dict["edgeBadLength"])
+
 
     ###############
     #  Plot video

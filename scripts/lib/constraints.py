@@ -1,9 +1,11 @@
 import numpy as np
+import pandas as pd
 
 # Find all nodes with too low likelihood
 def likelihood_constrain(P, param):
     nFrames, nNodes = P.shape
     perr = 1 - P
+    perr[perr==0] = 1.0e-15  # Replace all 0-errors with small numbers to allow log-plot
     return perr, np.greater(perr, param["LIKELIHOOD_THR"])
 
 # Find all nodes with too high velocity
@@ -36,7 +38,7 @@ def edge_constrain(X, Y, nodeLowConf, param):
     edgeLength = np.zeros((nFrames, nEdges))
     edgeLowConf = np.zeros((nFrames, nEdges), dtype=bool)
     edgeBadLength = np.zeros((nFrames, nEdges), dtype=bool) # Edge is bad if its length is too big or too small
-    nodeBadEdge = np.zeros(X.shape)
+    nodeBadEdge = np.zeros(X.shape, dtype=int)
     
     # Maximum number of edges adjacent to each node
     nodeMaxEdgeQuantity = np.zeros(nNodes)
@@ -72,7 +74,7 @@ def edge_constrain(X, Y, nodeLowConf, param):
     for iNode in range(nNodes):
         nodeBadEdge[:, iNode] = (nodeBadEdge[:, iNode] > 0) & (nodeBadEdge[:, iNode] == nodeMaxEdgeQuantity[iNode])
         
-    return edgeLength, edgeBadLength, edgeLowConf, nodeBadEdge
+    return edgeLength, edgeBadLength, edgeLowConf, nodeBadEdge.astype(bool)
 
 # Provide triplet of points for each angle
 # def angle_constrain(X, Y, param):
@@ -93,9 +95,70 @@ def edge_constrain(X, Y, nodeLowConf, param):
         
 #     return angles
     
+def compute_constraints(X, Y, P, param):
+    constr_dict = {}
     
+    ##################################
+    # Compute likelihood constraints
+    ##################################
+    perr, nodeLowConf = likelihood_constrain(P, param)
+    constr_dict.update({"perr" : perr, "nodeLowConf" : nodeLowConf})
     
-
-
-
-
+    ##################################
+    # Compute velocity constraints
+    ##################################
+    param['HAVE_V_CONSTR'] = "NODE_MAX_V" in param.keys()
+    if not param['HAVE_V_CONSTR']:
+        print("Skipping velocity constraint as no velocities provided")
+    elif len(param["NODE_MAX_V"]) != len(param["NODE_NAMES"]):
+        raise ValueError("Have", len(param["NODE_NAMES"]), "nodes, but only", len(param["NODE_MAX_V"]), "velocities were specified")
+    else:
+        V, VLowConf, nodeBadV1, nodeBadV2 = velocity_constrain(X, Y, constr_dict["nodeLowConf"], param)
+        constr_dict.update({"V" : V, "VLowConf" : VLowConf, "nodeBadV1" : nodeBadV1, "nodeBadV2" : nodeBadV2})
+        
+    ##################################
+    # Compute edge constraints
+    ##################################
+    param['HAVE_EDGE_CONSTR'] = "EDGE_MIN_R" in param.keys()
+    if not param['HAVE_EDGE_CONSTR']:
+        print("Skipping edge constraint as no edges provided")
+    else:
+        N_EDGES = len(param['EDGE_NODES'])
+        correct_edge_template = ("EDGE_MIN_R" in param.keys()) and \
+                                ("EDGE_MAX_R" in param.keys()) and \
+                                (len(param["EDGE_MIN_R"]) == N_EDGES) and \
+                                (len(param["EDGE_MAX_R"]) == N_EDGES)
+        if not correct_edge_template:
+            raise ValueError("bad edge min and max ratio in template file")            
+        else:
+            edgeLength, edgeLowConf, edgeBadLength, nodeBadEdge = edge_constrain(X, Y, constr_dict["nodeLowConf"], param)
+            constr_dict.update({"edgeLength" : edgeLength, "edgeLowConf" : edgeLowConf, "edgeBadLength" : edgeBadLength, "nodeBadEdge" : nodeBadEdge})
+            
+    ##################################
+    # Construct summary table
+    ##################################
+    framesLowConf    = np.sum(nodeLowConf, axis=1) > 0
+    nodesBadTotal    = np.copy(nodeLowConf)
+    badDict = {"Low confidence" : (np.sum(nodeLowConf), np.sum(framesLowConf))}
+    
+    if param['HAVE_V_CONSTR']:
+        framesBadV1      = np.sum(nodeBadV1, axis=1) > 0
+        framesBadV2      = np.sum(nodeBadV2, axis=1) > 0
+        print(nodesBadTotal.dtype, nodeBadV1.dtype)
+        print(nodesBadTotal.shape, nodeBadV1.shape)
+        nodesBadTotal = nodesBadTotal | nodeBadV1
+        badDict["High velocity 1 neighbour"]  = (np.sum(nodeBadV1), np.sum(framesBadV1))
+        badDict["High velocity 2 neighbours"] = (np.sum(nodeBadV2), np.sum(framesBadV2))
+        
+    if param['HAVE_EDGE_CONSTR']:
+        framesBadEdgeLen = np.sum(edgeBadLength, axis=1) > 0
+        nodesBadTotal = nodesBadTotal | nodeBadEdge
+        badDict["Edges too long or short"] = (np.sum(edgeBadLength), np.sum(framesBadEdgeLen))
+        print("Average lengths of edges are", np.mean(edgeLength, axis=0))
+        
+    framesBadTotal   = np.sum(nodesBadTotal, axis=1) > 0    
+    badDict["All the above combined"] = (np.sum(nodesBadTotal), np.sum(framesBadTotal))
+    
+    constr_dict["summary"] = pd.DataFrame(badDict, index=['Nodes', 'Frames'])
+    
+    return constr_dict
