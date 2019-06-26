@@ -1,0 +1,9 @@
+{
+  "NODE_NAMES"       : ["Nose", "Bottom"],
+  "EDGE_NODES"       : [[0,1]],
+  "NODE_MAX_V"       : [70, 70],
+  "EDGE_MIN_R"       : [0.5],
+  "EDGE_MAX_R"       : [2],
+  "LIKELIHOOD_THR"   : 0.05,
+  "STICKMAN_OVERLAY" : true
+}
