@@ -10,18 +10,16 @@ import h5py
 import pandas as pd
 import copy
 
-pwd_project = sys.argv[1]
+from lib.qt_wrapper import gui_fname
 
-pwd_config_file = os.path.join(pwd_project, 'config.yaml')
 
-if not os.path.isfile(pwd_config_file):
-  raise ValueError('Config file not found at:', pwd_config_file)
+pwd_config_file = gui_fname("Select config file...", "./", "Config Files (*.yaml)")
+pwd_project = os.path.dirname(pwd_config_file)
 
 pwd_project     = os.path.abspath(pwd_project)
 pwd_config_file = os.path.abspath(pwd_config_file)
 
-#print("Absolute path to project is: ", pwd_project)
-print("Absolute path to project file is: ", pwd_config_file)
+print("Absolute path to config file is: ", pwd_config_file)
 
 ##################################
 #  Editing config.yaml file
@@ -33,7 +31,6 @@ with open(pwd_config_file, "r") as fconf:
 # Fix project path
 project_path_old = data_conf['project_path']
 data_conf['project_path'] = pwd_project
-#print('Old path:', project_path_old)
 
 # Fix all paths to videos
 video_sets_old = data_conf.pop('video_sets')
