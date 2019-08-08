@@ -14,10 +14,6 @@ print("Appended base directory", libdir)
 # local libraries
 from qt_wrapper import gui_fname, gui_fsave, gui_fpath
 
-
-
-
-
 # GUI: Select source and target files
 src_name = gui_fname("Select vid file...", "./", "Video Files (*.avi)")
 tmp_pwd = os.path.dirname(src_name)

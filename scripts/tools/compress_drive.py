@@ -11,83 +11,66 @@
 # saved with the same name in the _compressed folder substructure
 ######################################################
 
-import sys
-import os
-import cv2
+# System modules
+import os, sys, subprocess
 
-def convert(inPathName, outPathName):
-    # Reader
-    capture = cv2.VideoCapture(inPathName)
-    nFrame = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = capture.get(cv2.CAP_PROP_FPS)
-    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    frameShape = (width, height)
+# Append base directory
+currentdir = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(currentdir)
+libdir = os.path.join(parentdir, "lib")
+sys.path.insert(0, libdir)
+print("Appended base directory", libdir)
 
-    # Writer
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    out = cv2.VideoWriter(outPathName,fourcc, fps, frameShape, isColor=False)
+# local libraries
+from qt_wrapper import gui_fname, gui_fsave, gui_fpath
+from os_lib import progress_bar, getfiles_walk, copy_folder_structure, move_filepaths
+from video_convert_lib import convert_cv2, convert_ffmpeg_h265
 
-    print("Converting file", inPathName, "to", outPathName)
-    print("total frames", nFrame, "shape", frameShape, "fps", fps)
+# Check if only allowed folders are specified
+allowed_formats = ['.avi', '.mp4']
+if (len(sys.argv) != 2) or (sys.argv[1] not in allowed_formats):
+    raise ValueError("Must specify output format from", allowed_formats)
+source_format = '.avi'
+target_format = sys.argv[1]
 
-    # Convert
-    while True:
-        ret, frame = capture.read()
-        if ret:
-            out.write(frame[:,:,0])
-        else:
-            break
-
-
-    # Release everything if job is finished
-    out.release()
-
-
-# Get path to video folder
-inputpath = sys.argv[1]
-path = os.path.abspath(os.path.join(inputpath, os.pardir))
-# localFolder = os.path.basename(os.path.dirname(inputpath))
-localFolder = os.path.basename(inputpath)
-
-
-if len(sys.argv) < 3:
-  outputpath = os.path.join(path, localFolder + "_compressed")
-else:
-  outputpath = os.path.join(sys.argv[2], localFolder + "_compressed")
-
-
+# GUI: Select source and target files
+src_path = gui_fpath("Select source directory", "./")
+tmp_pwd = os.path.dirname(src_path)
+trg_parentpath = gui_fpath("Select target directory", tmp_pwd)
+src_basename = os.path.basename(src_path)
+trg_path = os.path.join(trg_parentpath, src_basename + "_compressed")
 
 print("Copying structure from")
-print("  ", inputpath)
+print("  ", src_path)
 print("to")
-print("  ", outputpath)
+print("  ", trg_path)
 print("---------------------------------------")
 
-for dirpath, dirnames, filenames in os.walk(inputpath):
-    # Get current relative path
-    relpath = os.path.relpath(dirpath, inputpath)
-    if relpath == ".":
-        relpath = ""
+print("Generating folder structure ...")
+copy_folder_structure(src_path, trg_path)
 
-    # Make a new folder
-    newfolderoutpath = os.path.join(outputpath, relpath)
+print("Finding all source files of interest ...")
+src_fileswalk = getfiles_walk(src_path, [source_format])
 
-    if not os.path.isdir(newfolderoutpath):
-        print("Making directory:", newfolderoutpath)
-        os.mkdir(newfolderoutpath)
+print("Checking if files exist ...")
+src_fpaths_unproc, trg_fpaths_unproc = move_filepaths(src_fileswalk, src_path, trg_path, skip_exist=True)
+
+# Change extension to target
+trg_fpaths_unproc = [fpath[:-4] + target_format for fpath in trg_fpaths_unproc]
+
+print("Starting conversion ...")
+nFilesTotal = len(src_fileswalk)
+nFilesNew = len(trg_fpaths_unproc)
+iFiles = nFilesTotal - nFilesNew
+
+for src_fpath, trg_fpath in zip(src_fpaths_unproc, trg_fpaths_unproc):
+    progress_bar(iFiles, nFilesTotal)
+    iFiles += 1
+    if target_format == '.avi':
+        convert_cv2(src_fpath, trg_fpath, FOURCC='MJPG')
     else:
-        print("-->Warning: skipping existing directory", newfolderoutpath)
+        convert_ffmpeg_h265(src_fpath, trg_fpath, lossless=False, gray=True)
+        #subprocess.run(["ffmpeg","-i", src_fpath, "-vf", "format=gray", "-c:v", "libx265", "-preset", "slow", "-x265-params", "crf=22", trg_fpath])
+        
+print("Done!")
 
-    # List all filenames in that folder
-    for filename in filenames:
-        if os.path.splitext(filename)[1] == ".avi":
-            inFilePathName = os.path.join(dirpath, filename)
-            outFilePathName = os.path.join(os.path.join(outputpath, relpath), filename)
-
-            # print("converting file", inFilePathName, "to", outFilePathName)
-
-            if os.path.isfile(outFilePathName):
-                print("--->Warning: skipping already existing file", outFilePathName)
-            else:
-                convert(inFilePathName, outFilePathName)
