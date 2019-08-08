@@ -60,11 +60,14 @@ def dlc_csv_composite_crawl(rootdir, outdir):
     
     path_dict_csv = paths2dict(walkpaths_csv)
     path_dict_avi = paths2dict(walkpaths_avi)
+    
+    print(path_dict_csv)
+    print(path_dict_avi)
         
-    # For each folder, create an output file that merges files inside
-    for basename, csv_path_list in path_dict.items():
-        assert basename in path_dict_avi.keys(), basename + " has .csv but no videos"        
-        dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], basename+'.h5')
+#     # For each folder, create an output file that merges files inside
+#     for basename, csv_path_list in path_dict.items():
+#         assert basename in path_dict_avi.keys(), basename + " has .csv but no videos"        
+#         dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], basename+'.h5')
 
         
 '''
