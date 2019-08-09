@@ -2,9 +2,13 @@ import os, sys
 import numpy as np
 
 # Print progress bar with percentage
-def progress_bar(i, imax):
+def progress_bar(i, imax, suffix=None):
     sys.stdout.write('\r')
     sys.stdout.write('[{:3d}%] '.format(i * 100 // imax))
+    if suffix is not None:
+        sys.stdout.write(suffix)
+    if i == imax:
+        sys.stdout.write("\n")
     sys.stdout.flush()
 
 # Get path relative to a higher level path

@@ -1,9 +1,11 @@
+import os
 import numpy as np
 # import pandas as pd
 from collections import OrderedDict, defaultdict
+import h5py
 import cv2
 
-from lib.os_lib import getfiles_walk
+from lib.os_lib import getfiles_walk, progress_bar
 from lib.hdf5_wrapper import npStrArr2h5
 
 
@@ -37,8 +39,9 @@ def parse_dlc_csv(fname):
 
 # Get fps of the video
 def parse_avi_meta(vidname):
-    with cv2.VideoCapture(vidname) as capture:
-        fps = capture.get(cv2.CAP_PROP_FPS)
+    capture = cv2.VideoCapture(vidname)
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    capture.release()
     return fps
 
 
@@ -55,19 +58,23 @@ def dlc_csv_composite_crawl(rootdir, outdir):
             path_dict[os.path.basename(path)] += [os.path.join(path, name)]
         return path_dict
     
+    print("Finding paths to CSV and AVI files")
     walkpaths_csv = getfiles_walk(rootdir, ['DeepCut_resnet50', '.csv'])
     walkpaths_avi = getfiles_walk(rootdir, ['.avi'])
     
     path_dict_csv = paths2dict(walkpaths_csv)
     path_dict_avi = paths2dict(walkpaths_avi)
     
-    print(path_dict_csv)
-    print(path_dict_avi)
+#     print(path_dict_csv)
+#     print(path_dict_avi)
         
-#     # For each folder, create an output file that merges files inside
-#     for basename, csv_path_list in path_dict.items():
-#         assert basename in path_dict_avi.keys(), basename + " has .csv but no videos"        
-#         dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], basename+'.h5')
+    # For each folder, create an output file that merges files inside
+    N_FOLDERS = len(path_dict_csv)
+    for i, (basename, csv_path_list) in enumerate(path_dict_csv.items()):
+        print("Processing folder", i, "/", N_FOLDERS, "; Have", len(csv_path_list), "files")
+        outpathname = os.path.join(outdir, basename+'.h5')
+        assert basename in path_dict_avi.keys(), basename + " has .csv but no videos"        
+        dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], outpathname)
 
         
 '''
@@ -79,7 +86,7 @@ def dlc_csv_composite_crawl(rootdir, outdir):
 3. Fill array with data
 4. Save to H5
 '''
-def dlc_csv_merge_write(csv_list, vid_list, outname):
+def dlc_csv_merge_write(csv_list, vid_list, outpathname):
     # Check if all elements of a list are the same
     def check_equal(lst, err=""):
         for el in lst[1:]:
@@ -89,18 +96,28 @@ def dlc_csv_merge_write(csv_list, vid_list, outname):
     if len(csv_list) != len(vid_list):
         raise ValueError("There are", len(vid_list), "videos and", len(fpath), " csv files")
     
-    # Get data and fps
-    csv_data_list = [parse_dlc_csv(fname) for fname in csv_list]
-    avi_fps_list = [parse_avi_meta(vid_name) for vid_name in vid_list]
+    N_FILES = len(csv_list)
+    csv_data_list = []
+    progress_bar(0, N_FILES, "parsing CSV Files")
+    for i, csv_name in enumerate(csv_list):
+        csv_data_list += [parse_dlc_csv(csv_name)]
+        progress_bar(i+1, N_FILES, "parsing CSV Files")
+    
+    avi_fps_list = []
+    progress_bar(0, N_FILES, "getting FPS info")
+    for i, vid_name in enumerate(vid_list):
+        avi_fps_list += [parse_avi_meta(vid_name)]
+        progress_bar(i+1, N_FILES, "getting FPS info")
         
+    print("-- computing merged file")
     # Assert that all framerates are the same
     # Assert that all nodeNames match exactly
     check_equal(avi_fps_list, err="Found non-matching framerates")
     check_equal([data[0] for data in csv_data_list], err="Found non-matching keys")
     
     # Determine nNodes, nTrials, and longest nTime
-    nNodes   = len(alldata[0][0])
-    nTrials  = len(flist)
+    nNodes   = len(csv_data_list[0][0])
+    nTrials  = len(csv_data_list)
     nTimesMax = np.max([data[1].shape[0] for data in csv_data_list])
 
     # Make output array
@@ -111,13 +128,13 @@ def dlc_csv_merge_write(csv_list, vid_list, outname):
     # Fill output array
     for i, (nodeNames, X, Y, P) in enumerate(csv_data_list):
         nTimesThis = X.shape[0]
-        outdata_X[:nTimesThis, nNodes, :, i] = X
-        outdata_Y[:nTimesThis, nNodes, :, i] = Y
-        outdata_P[:nTimesThis, nNodes, :, i] = P
+        outdata_X[:nTimesThis, :, i] = X
+        outdata_Y[:nTimesThis, :, i] = Y
+        outdata_P[:nTimesThis, :, i] = P
     
     # Write result to file
-    print("Writing merged data of", nTrials, "videos to", outname)
-    rezfile = h5py.File(outname, "w")
+    print("-- writing merged data of", nTrials, "videos to", outpathname)
+    rezfile = h5py.File(outpathname, "w")
     npStrArr2h5(rezfile, csv_data_list[0][0], 'NODE_NAMES')
     npStrArr2h5(rezfile, csv_list, 'CSV_PATHS')
     npStrArr2h5(rezfile, vid_list, 'VID_PATHS')
