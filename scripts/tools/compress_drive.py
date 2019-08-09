@@ -52,11 +52,21 @@ copy_folder_structure(src_path, trg_path)
 print("Finding all source files of interest ...")
 src_fileswalk = getfiles_walk(src_path, [source_format])
 
-print("Checking if files exist ...")
-src_fpaths_unproc, trg_fpaths_unproc = move_filepaths(src_fileswalk, src_path, trg_path, skip_exist=True)
+# Determining new pathnames for files
+src_fpaths, trg_fpaths = move_filepaths(src_fileswalk, src_path, trg_path)
 
-# Change extension to target
-trg_fpaths_unproc = [fpath[:-4] + target_format for fpath in trg_fpaths_unproc]
+# Change file extensions
+trg_fpaths = [fpath[:-4] + target_format for fpath in trg_fpaths]
+
+print("Checking if files exist ...")
+src_fpaths_unproc = []
+trg_fpaths_unproc = []
+for src_fpath, trg_fpath in zip(src_fpaths, trg_fpaths):
+    if os.path.isfile(trg_fpath):
+        print("-- skipping existing file", trg_fpath)
+    else:
+        src_fpaths_unproc += src_fpath
+        trg_fpaths_unproc += trg_fpath
 
 print("Starting conversion ...")
 nFilesTotal = len(src_fileswalk)

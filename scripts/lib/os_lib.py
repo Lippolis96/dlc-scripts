@@ -44,16 +44,13 @@ def copy_folder_structure(source_path, target_path):
             print("Skipping existing directory", target_dirpath)
 
 # Converts file paths with respect to new root directory
-def move_filepaths(fpaths_walk, src_path, trg_path, skip_exist=False):
+def move_filepaths(fpaths_walk, src_path, trg_path):
     source_fpaths = []
     moved_fpaths = []
     for src_subpath, src_subname in fpaths_walk:
         src_relsubpath = get_relpath(src_subpath, src_path)
         trg_subpath = os.path.join(trg_path, src_relsubpath)
         trg_subfpath = os.path.join(trg_subpath, src_subname)
-        if skip_exist and os.path.isfile(trg_subfpath):
-            print("-- skipping existing file", trg_subfpath)
-        else:
-            source_fpaths += [os.path.join(src_subpath, src_subname)]
-            moved_fpaths += [trg_subfpath]
+        source_fpaths += [os.path.join(src_subpath, src_subname)]
+        moved_fpaths += [trg_subfpath]
     return source_fpaths, moved_fpaths
