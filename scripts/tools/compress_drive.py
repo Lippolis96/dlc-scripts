@@ -65,8 +65,8 @@ for src_fpath, trg_fpath in zip(src_fpaths, trg_fpaths):
     if os.path.isfile(trg_fpath):
         print("-- skipping existing file", trg_fpath)
     else:
-        src_fpaths_unproc += src_fpath
-        trg_fpaths_unproc += trg_fpath
+        src_fpaths_unproc += [src_fpath]
+        trg_fpaths_unproc += [trg_fpath]
 
 print("Starting conversion ...")
 nFilesTotal = len(src_fileswalk)
