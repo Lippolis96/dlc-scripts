@@ -37,6 +37,8 @@ def stickman(X, Y, param, constr_dict):
     ############################################
     # Extract video properties from original
     ############################################
+    if not os.path.isfile(param["AVI_FNAME"]):
+        raise IOError("The video file does not exist", param["AVI_FNAME"])
         
     capture = cv2.VideoCapture(param["AVI_FNAME"])
     fps = cv2.CAP_PROP_FPS

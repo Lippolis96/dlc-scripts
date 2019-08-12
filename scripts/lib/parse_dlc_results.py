@@ -74,7 +74,11 @@ def dlc_csv_composite_crawl(rootdir, outdir):
         print("Processing folder", i, "/", N_FOLDERS, "; Have", len(csv_path_list), "files")
         outpathname = os.path.join(outdir, basename+'.h5')
         assert basename in path_dict_avi.keys(), basename + " has .csv but no videos"        
-        dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], outpathname)
+        
+        if os.path.isfile(outpathname):
+            print("Skipping existing output file", outpathname)
+        else:
+            dlc_csv_merge_write(csv_path_list, path_dict_avi[basename], outpathname)
 
         
 '''
@@ -138,6 +142,7 @@ def dlc_csv_merge_write(csv_list, vid_list, outpathname):
     npStrArr2h5(rezfile, csv_data_list[0][0], 'NODE_NAMES')
     npStrArr2h5(rezfile, csv_list, 'CSV_PATHS')
     npStrArr2h5(rezfile, vid_list, 'VID_PATHS')
+    rezfile['FPS'] = avi_fps_list[0]
     rezfile['X'] = outdata_X
     rezfile['Y'] = outdata_Y
     rezfile['P'] = outdata_P
