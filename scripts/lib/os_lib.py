@@ -23,12 +23,14 @@ def get_subfolders(folderpath):
 
 # Find all files in a given directory including subdirectories
 # All keys must appear in file name
-def getfiles_walk(inputpath, keys):
+def getfiles_walk(inputpath, keys, max_size=None):
     rez = []
     NKEYS = len(keys)
     for dirpath, dirnames, filenames in os.walk(inputpath):
         for filename in filenames:
-            if np.sum(np.array([key in filename for key in keys], dtype=int)) == NKEYS:
+            keys_test = np.sum(np.array([key in filename for key in keys], dtype=int)) == NKEYS
+            size_test = (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
+            if keys_test and size_test:
                 rez += [(dirpath, filename)]
     return np.array(rez)
 
