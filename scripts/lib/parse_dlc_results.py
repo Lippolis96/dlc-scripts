@@ -52,11 +52,12 @@ def parse_avi_meta(vidname):
 def dlc_csv_composite_crawl(rootdir, outdir):
     
     # Construct dictionary of files indexed by the containing folder name
+    # Files must appear in alphabetical order
     def paths2dict(walkpaths):            
         path_dict = defaultdict(list)
         for path, name in walkpaths:
             path_dict[os.path.basename(path)] += [os.path.join(path, name)]
-        return path_dict
+        return {k : np.sort(v) for k,v in path_dict.items()}
     
     print("Finding paths to CSV and AVI files")
     walkpaths_csv = getfiles_walk(rootdir, ['DeepCut_resnet50', '.csv'])
@@ -64,9 +65,6 @@ def dlc_csv_composite_crawl(rootdir, outdir):
     
     path_dict_csv = paths2dict(walkpaths_csv)
     path_dict_avi = paths2dict(walkpaths_avi)
-    
-#     print(path_dict_csv)
-#     print(path_dict_avi)
         
     # For each folder, create an output file that merges files inside
     N_FOLDERS = len(path_dict_csv)
@@ -97,8 +95,14 @@ def dlc_csv_merge_write(csv_list, vid_list, outpathname):
             if el != lst[0]:
                 raise ValueError(err, lst[0], "!=", el)
     
+    # Check that the number of videos and CSV files is the same
     if len(csv_list) != len(vid_list):
         raise ValueError("There are", len(vid_list), "videos and", len(fpath), " csv files")
+        
+    # Check that the videos and CSV files correspond
+    for csv_name, vid_name in zip(csv_list, vid_list):
+        if os.path.basename(vid_name)[:-4] not in csv_name:
+            raise ValueError("CSV and VIDEO files do not correspond", csv_name, vid_name)
     
     N_FILES = len(csv_list)
     csv_data_list = []
