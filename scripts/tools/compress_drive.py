@@ -30,6 +30,7 @@ from video_convert_lib import convert_cv2, convert_ffmpeg_h265
 # Parse arguments
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--format', type=str, choices=['.avi', '.mp4'], required=True, help='Type of the output video (avi/mp4)')
+parser.add_argument('--minsize', type=int, default=None, help='Minimal allowed size of video')
 parser.add_argument('--maxsize', type=int, default=None, help='Maximal allowed size of video')
 parser.add_argument('--crop', type=int, nargs=4, required=False, help='Cropping')
 #parser.add_argument('-l','--list', nargs='+'
@@ -37,8 +38,11 @@ args = parser.parse_args()
 
 source_format = '.avi'
 target_format = args.format
+min_file_size = args.minsize
 max_file_size = args.maxsize
 crop_coords = args.crop
+
+print(crop_coords)
 
 # GUI: Select source and target files
 src_path = gui_fpath("Select source directory", "./")
@@ -46,6 +50,8 @@ tmp_pwd = os.path.dirname(src_path)
 trg_parentpath = gui_fpath("Select target directory", tmp_pwd)
 src_basename = os.path.basename(src_path)
 trg_path = os.path.join(trg_parentpath, src_basename + "_compressed")
+
+
 
 print("Copying structure from")
 print("  ", src_path)
@@ -57,7 +63,7 @@ print("Generating folder structure ...")
 copy_folder_structure(src_path, trg_path)
 
 print("Finding all source files of interest ...")
-src_fileswalk = getfiles_walk(src_path, [source_format], max_size=max_file_size)
+src_fileswalk = getfiles_walk(src_path, [source_format], min_size=min_file_size, max_size=max_file_size)
 
 # Determining new pathnames for files
 src_fpaths, trg_fpaths = move_filepaths(src_fileswalk, src_path, trg_path)

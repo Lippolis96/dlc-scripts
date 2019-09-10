@@ -43,9 +43,7 @@ def convert_cv2(inPathName, outPathName, FOURCC='MJPG', crop=None):
     out.release()
     
     
-def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, crop=None):
-    print("aaaaaaaaaaaaaa")
-    
+def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, crop=None):    
     task = ["ffmpeg","-i", src_name]
     
     # Determine color
@@ -57,7 +55,7 @@ def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, 
         xmin, xmax, ymin, ymax = crop
         out_w = xmax - xmin
         out_h = ymax - ymin
-        task += ["-vf", "crop="+str(out_w)+":"+str(out_h)+":"+str(xmin)+":"+str(xmax)] #"--filter:v"
+        task += ["-vf", "crop="+str(out_w)+":"+str(out_h)+":"+str(xmin)+":"+str(ymin)] #"--filter:v"
     
     # VCodec
     task += ["-c:v", "libx265"]

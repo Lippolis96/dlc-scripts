@@ -11,28 +11,33 @@ def progress_bar(i, imax, suffix=None):
         sys.stdout.write("\n")
     sys.stdout.flush()
 
+    
 # Get path relative to a higher level path
 # NOTE: ONLY WORKS WITH FOLDER PATHS, NOT FILE PATHS
 def get_relpath(path, root):
     relpath = os.path.relpath(path, root)
     return relpath if relpath != "." else ""
 
+
 # Find all folders in this folder (excluding subdirectories)
 def get_subfolders(folderpath):
     return [_dir for _dir in os.listdir(folderpath) if os.path.isdir(os.path.join(folderpath, _dir))]
 
+
 # Find all files in a given directory including subdirectories
 # All keys must appear in file name
-def getfiles_walk(inputpath, keys, max_size=None):
+def getfiles_walk(inputpath, keys, min_size=None, max_size=None):
     rez = []
     NKEYS = len(keys)
     for dirpath, dirnames, filenames in os.walk(inputpath):
         for filename in filenames:
             keys_test = np.sum(np.array([key in filename for key in keys], dtype=int)) == NKEYS
-            size_test = (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
-            if keys_test and size_test:
+            min_size_test = (min_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) > min_size)
+            max_size_test = (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
+            if keys_test and min_size_test and max_size_test:
                 rez += [(dirpath, filename)]
     return np.array(rez)
+
 
 # Creates exact copy of source folder structure at target location (only folders, no files)
 def copy_folder_structure(source_path, target_path):
@@ -49,6 +54,7 @@ def copy_folder_structure(source_path, target_path):
         else:
             print("Skipping existing directory", target_dirpath)
 
+            
 # Converts file paths with respect to new root directory
 def move_filepaths(fpaths_walk, src_path, trg_path):
     source_fpaths = []

@@ -143,9 +143,12 @@ def dlc_csv_merge_write(csv_list, vid_list, outpathname):
     # Write result to file
     print("-- writing merged data of", nTrials, "videos to", outpathname)
     rezfile = h5py.File(outpathname, "w")
+    
+    vidNames = [os.path.basename(vidpathname) for vidpathname in vid_list]
+    rezfile.attrs['VID_PATH'] = np.string_(os.path.dirname(vidNames[0]))
     npStrArr2h5(rezfile, csv_data_list[0][0], 'NODE_NAMES')
-    npStrArr2h5(rezfile, csv_list, 'CSV_PATHS')
-    npStrArr2h5(rezfile, vid_list, 'VID_PATHS')
+    npStrArr2h5(rezfile, vidNames, 'VID_NAMES')
+    #npStrArr2h5(rezfile, csv_list, 'CSV_PATHS')
     rezfile['FPS'] = avi_fps_list[0]
     rezfile['X'] = outdata_X
     rezfile['Y'] = outdata_Y
