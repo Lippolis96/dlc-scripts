@@ -147,6 +147,11 @@ class MyGui(object):
             self.updateCircleRadius(self.circleRadius + self.circleRadiusDelta)
         elif event.key == ' ' and self.with_markings:
             self.gotoNextBadFrameIdx()
+        elif event.key == 'c' and self.with_markings:
+            self.copyPrevPoints()
+        elif event.key == 'g' and self.with_markings:
+            self.markAllGood()
+		
         
         
     def drawCircles(self, frameIdx):
@@ -234,23 +239,50 @@ class MyGui(object):
         
         if badFrameIdx != int(self.slider.val):
             self.changeFrameExternal(badFrameIdx)
-        
 
+
+    def copyPrevPoints(self):
+        frameIdx = int(self.slider.val)
+        if frameIdx >= 1:
+            self.X[frameIdx] = self.X[frameIdx-1]
+            self.Y[frameIdx] = self.Y[frameIdx-1]
+            self.P[frameIdx] = np.zeros(self.NNodes)
+
+            self.drawCircles(frameIdx)
+            self.fig.canvas.draw()
+
+            print("Copied points from", frameIdx-1, "to", frameIdx)
+			
+			
+    def markAllGood(self):
+        frameIdx = int(self.slider.val)
+        self.P[frameIdx] = np.full(self.NNodes, 2)
+
+        self.drawCircles(frameIdx)
+        self.fig.canvas.draw()
+
+        print("Marked all on frame ", frameIdx," as good")
+		
         
     def saveResults(self, event):
         resultsfile = gui_fsave("Choose tracking file name to save results...", self.tmp_pwd, "Tracking file (*.csv)")
+        
+        # Copy preamble from original file
         with open(self.csvpath, "r") as fin:
-            with open(resultsfile, "w") as fout:
-                # Copy first 3 lines as they are
-                for line in fin.readlines()[:3]:
-                    fout.write(line)
-                
-                for i in range(self.NFrames):
-                    # The format for each line is [x1,y1,p1,x2,y2,p2,...] where numbers are label indices
-                    line_list = [i] + list(np.vstack((self.X[i], self.Y[i], self.P[i])).transpose().flatten())
-                    fout.write(",".join([str(el) for el in line_list])+"\n")
+            preamble = fin.readlines()[:3]
+
+        # Write new file
+        with open(resultsfile, "w") as fout:
+            # Copy first 3 lines as they are
+            for line in preamble:
+                fout.write(line)
+            
+            for i in range(self.NFrames):
+                # The format for each line is [x1,y1,p1,x2,y2,p2,...] where numbers are label indices
+                line_list = [i] + list(np.vstack((self.X[i], self.Y[i], self.P[i])).transpose().flatten())
+                fout.write(",".join([str(el) for el in line_list])+"\n")
         print("Seems to have saved successfully, exiting...")
-        exit()
+        #exit()
 
     def show(self):
         plt.show()
