@@ -1,0 +1,21 @@
+# 1. Plug in harddrive
+# 2. Check name of drive
+#  Look for partition with correct size (e.g. sda1)
+
+	lsblk
+
+# 3. Create folder 
+
+	sudo mkdir /media/hpc_user/MyBook1/
+
+# 4. Mount harddrive
+
+	sudo mount -t ntfs /dev/sda1 /media/hpc_user/MyBook1/
+
+# 5. Unmount harddrive (when done)
+
+	sudo umount /media/hpc_user/MyBook1/
+
+# 6. Delete disk folder (when done)
+
+	sudo rm -rf /media/hpc_user/MyBook1/
