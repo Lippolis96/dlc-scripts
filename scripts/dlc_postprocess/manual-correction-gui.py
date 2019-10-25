@@ -5,6 +5,9 @@ from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
 #from PIL import Image
 import cv2
 
+projectPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(projectPath)
+
 from lib.qt_wrapper import gui_fname, gui_fsave
 from lib.parse_dlc_results import parse_dlc_csv
 from lib.draggable import DraggableCircle
@@ -51,7 +54,7 @@ class MyGui(object):
         self.circleRadiusDelta = 1
         
         # Attempt to import settings file
-        settingsFilePath = "settings_postprocess_marking.json"
+        settingsFilePath = "settings-gui.json"
         if os.path.isfile(settingsFilePath):
             with open(settingsFilePath, 'r') as f:
                 jsonData = json.load(f)

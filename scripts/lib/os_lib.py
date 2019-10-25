@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+import bisect
 
 # Print progress bar with percentage
 def progress_bar(i, imax, suffix=None):
@@ -11,7 +12,13 @@ def progress_bar(i, imax, suffix=None):
         sys.stdout.write("\n")
     sys.stdout.flush()
 
-    
+def sizeToString(sizeBytes):
+    ranges = [1, 10**3, 10**6, 10**9, 10**12]
+    suffix = ['B', 'Kb', 'Mb', 'Gb', 'Tb']
+    idxThis = np.max([bisect.bisect_left(ranges, sizeBytes), 1])-1
+    return str(np.round(sizeBytes / ranges[idxThis],3)) + " " + suffix[idxThis]
+
+
 # Get path relative to a higher level path
 # NOTE: ONLY WORKS WITH FOLDER PATHS, NOT FILE PATHS
 def get_relpath(path, root):
@@ -20,21 +27,28 @@ def get_relpath(path, root):
 
 
 # Find all folders in this folder (excluding subdirectories)
-def get_subfolders(folderpath):
-    return [_dir for _dir in os.listdir(folderpath) if os.path.isdir(os.path.join(folderpath, _dir))]
+def get_subfolders(path):
+    return [_dir for _dir in os.listdir(path) if os.path.isdir(os.path.join(path, _dir))]
+
+
+# Get all files of a given extension in this folder (excluding subfolders)
+def get_files(path, ext):
+    return [fname for fname in os.listdir(path) if os.path.splitext(fname)[1] == ext]
 
 
 # Find all files in a given directory including subdirectories
 # All keys must appear in file name
-def getfiles_walk(inputpath, keys, min_size=None, max_size=None):
+def getfiles_walk(inputpath, keys=None, min_size=None, max_size=None):
     rez = []
-    NKEYS = len(keys)
     for dirpath, dirnames, filenames in os.walk(inputpath):
         for filename in filenames:
-            keys_test = np.sum(np.array([key in filename for key in keys], dtype=int)) == NKEYS
-            min_size_test = (min_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) > min_size)
-            max_size_test = (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
-            if keys_test and min_size_test and max_size_test:
+            filterTestsPass = [
+                (keys is None) or np.all([key in filename for key in keys]),
+                (min_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) > min_size),
+                (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
+            ]
+
+            if np.all(filterTestsPass):
                 rez += [(dirpath, filename)]
     return np.array(rez)
 

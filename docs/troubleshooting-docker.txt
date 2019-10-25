@@ -2,6 +2,13 @@
 How to restart docker:
 --------------------------
 1) run all lines inside "start_docker.sh" one by one. Just running the script does not work for unknown reason
+  docker stop containername
+  docker rm containername
+
+  cd /srv/dlc-shared/Docker4DeepLabCut2.0
+  GPU=0 bash ./dlc-docker run -d -p 2351:8888 -e USER_HOME=$HOME/projects-dlc/ --name containername mydlcuser:mydlcdocker
+  docker exec --user $USER -it containername /bin/bash                                                        
+
 2) Manually download ResNets, as DLC does not do it by default :(
   cd /usr/local/lib/python3.6/dist-packages/deeplabcut/pose_estimation_tensorflow/models/pretrained
   sudo chmod +x download.sh
@@ -9,7 +16,27 @@ How to restart docker:
   sudo chown hpc_user:hpc_user resnet_v1_*
 
 ----------------------------
-How to mount an extra drive that is not already mounted inside docker
+How to mount usb in Linux
+----------------------------
+
+1. Plug in harddrive
+2. Check name of drive. Look for partition with correct size (e.g. sda1)
+	lsblk
+
+3. Create folder 
+	sudo mkdir /media/hpc_user/MyBook1/
+
+4. Mount harddrive
+	sudo mount -t ntfs /dev/sda1 /media/hpc_user/MyBook1/
+
+5. Unmount harddrive (when done)
+	sudo umount /media/hpc_user/MyBook1/
+
+6. Delete disk folder (when done)
+	sudo rm -rf /media/hpc_user/MyBook1/
+
+----------------------------
+How to moutn usb in Docker
 ----------------------------
 
 1. Edit dlc-docker inside Docker source code

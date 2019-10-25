@@ -16,16 +16,13 @@ import os, sys, subprocess
 import argparse
 
 # Append base directory
-currentdir = os.path.dirname(os.path.abspath(__file__))
-parentdir = os.path.dirname(currentdir)
-libdir = os.path.join(parentdir, "lib")
-sys.path.insert(0, libdir)
-print("Appended base directory", libdir)
+projectPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(projectPath)
 
 # local libraries
-from qt_wrapper import gui_fname, gui_fsave, gui_fpath
-from os_lib import progress_bar, getfiles_walk, copy_folder_structure, move_filepaths
-from video_convert_lib import convert_cv2, convert_ffmpeg_h265
+from lib.qt_wrapper import gui_fname, gui_fsave, gui_fpath
+from lib.os_lib import progress_bar, getfiles_walk, copy_folder_structure, move_filepaths
+from lib.video_convert_lib import convert_cv2, convert_ffmpeg_h265
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='Process some integers.')

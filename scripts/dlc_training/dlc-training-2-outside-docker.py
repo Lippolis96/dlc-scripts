@@ -1,14 +1,21 @@
 '''
-  The purpose of this code is to adjust all paths in the training dataset
+  The purpose of this code is to adjust all paths in the training dataset.
+  Only necessary if initial training phase was done on windows.
+
+  The code replaces any windows-like backslashes to linux forwards slashes in
+  * config.yaml
+  * all .csv labeling files
+  * all .h5 labeling files
 '''
 
-import numpy as np
+#import numpy as np
 import os, sys
 import yaml
-import pathlib
-import h5py
+#import h5py
 import pandas as pd
-import copy
+
+projectPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(projectPath)
 
 from lib.qt_wrapper import gui_fname
 
