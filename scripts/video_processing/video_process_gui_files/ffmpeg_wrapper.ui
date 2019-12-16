@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="infoCrawlTab">
        <attribute name="title">
@@ -42,8 +42,11 @@
           </item>
           <item>
            <widget class="QProgressBar" name="infoCrawlProgressBar">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="value">
-             <number>24</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -92,12 +95,22 @@
           </column>
           <column>
            <property name="text">
-            <string>Min Size</string>
+            <string>Shape</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Max Size</string>
+            <string>nFrames</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>FPS</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>codec</string>
            </property>
           </column>
          </widget>
@@ -106,7 +119,7 @@
       </widget>
       <widget class="QWidget" name="vidoeCompressTab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>operations</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>

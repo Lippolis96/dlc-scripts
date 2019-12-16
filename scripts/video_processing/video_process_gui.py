@@ -27,6 +27,7 @@ os.system(qtCompilePrefStr)
 import numpy as np
 from video_processing.video_process_gui_files.ffmpeg_wrapper import Ui_FFMPEG_WRAPPER
 from lib.os_lib import getfiles_walk, sizeToString
+import lib.video_convert_lib as video_lib
 
 
 #######################################################
@@ -58,37 +59,63 @@ class CompressGUI():
         self.gui.mainConvertButton.clicked.connect(self.react_convert_button)
 
         # Listeners - UI
-        self.dialog.wheelEvent = self.wheelEvent
+        #self.dialog.wheelEvent = self.wheelEvent
+        self.dialog.keyPressEvent = self.keyPressEvent
 
 
     # Get directory, then get all subfiles in that directory, then get their statistics
     def react_info_crawl(self):
         # Get root directory
+        print("Reading files")
         rootCrawlDir = QtWidgets.QFileDialog.getExistingDirectory(None, "Get root directory to inspect", "./")
 
         # Get all files and their sizes
         fileswalk = getfiles_walk(rootCrawlDir)
-        filePaths = np.array([os.path.join(path, name) for path, name in fileswalk])
-        fileSizes = np.array([os.path.getsize(fpath) for fpath in filePaths])
+        filesByExt = {}
 
-        # Filter file size statistics by file extension
-        exts = np.array([os.path.splitext(fpath)[1] for fpath in filePaths])
-        extsSet = set(exts)
-        extStatList = []
-        for ext in extsSet:
-            thisExtIdxs = exts == ext
-            thisExtSizes = fileSizes[thisExtIdxs]
-            extStatList += [(ext, len(thisExtSizes), np.sum(thisExtSizes), np.min(thisExtSizes), np.max(thisExtSizes))]
+        self.gui.infoCrawlProgressBar.setEnabled(True)
+        self.gui.infoCrawlProgressBar.setMaximum(len(fileswalk))
 
+        for iFile, (path, name) in enumerate(fileswalk):
+            self.gui.infoCrawlProgressBar.setValue(iFile)
+
+            thisExt = os.path.splitext(name)[1]
+            isVideo = thisExt in ['.avi', '.mp4']
+            fname = os.path.join(path, name)
+            fsize = os.path.getsize(fname)
+
+            if thisExt not in filesByExt.keys():
+                filesByExt[thisExt] = []
+
+            rezThis = [fsize]
+
+            if isVideo:
+                vidInfos = video_lib.get_info_cv2(fname)
+                rezThis += [vidInfos['shape'], vidInfos['nFrame'], vidInfos['fps'], vidInfos['fourcc']]
+
+            filesByExt[thisExt] += [rezThis]
+        self.gui.infoCrawlProgressBar.setEnabled(False)
+
+        print("Computing statistics")
+        # Summarize statistics by extension
+        statByExt = []
+        for ext, data in filesByExt.items():
+            totalFileSizes = sizeToString(np.sum(d[0] for d in data))
+            stat = [ext, len(data), totalFileSizes]
+            for iData in range(1, len(data[0])):
+                stat += [list(set([d[iData] for d in data]))]
+            statByExt += [stat]
+
+        print("Filling up table")
         #write results to table
         self.gui.infoCrawlTableWidget.setRowCount(0)
-        for iRow, extStat in enumerate(extStatList):
+        for iRow, extStat in enumerate(statByExt):
             self.gui.infoCrawlTableWidget.insertRow(iRow)
             for iCol, stat in enumerate(extStat):
-                elem = str(stat) if iCol <= 1 else sizeToString(stat)
-                self.gui.infoCrawlTableWidget.setItem(iRow, iCol, QtWidgets.QTableWidgetItem(elem))
+                self.gui.infoCrawlTableWidget.setItem(iRow, iCol, QtWidgets.QTableWidgetItem(str(stat)))
 
         # self.gui.infoCrawlTableWidget.resizeColumnsToContents()
+
 
     # Store relevant state variables into dictionary
     def get_gui_state(self):
@@ -139,13 +166,17 @@ class CompressGUI():
         pass
 
 
-
-
     # Change font size of all items on the form
-    def wheelEvent(self, event):
-        print("New font size", self.fontsize)
-        self.fontsize += event.angleDelta().y() // 120
-        self.gui.centralWidget.setStyleSheet("font-size: " + str(self.fontsize) + "pt;")
+    #def wheelEvent(self, event):
+        # print("New font size", self.fontsize)
+        # self.fontsize += event.angleDelta().y() // 120
+        # self.gui.centralWidget.setStyleSheet("font-size: " + str(self.fontsize) + "pt;")
+    def keyPressEvent(self, e):
+        if e.key() == QtCore.Qt.Key_Plus or e.key() == QtCore.Qt.Key_Minus:
+            self.fontsize += int(e.key() == QtCore.Qt.Key_Plus) - int(e.key() == QtCore.Qt.Key_Minus)
+            print("New font size", self.fontsize)
+            self.gui.centralWidget.setStyleSheet("font-size: " + str(self.fontsize) + "pt;")
+
 
 
 

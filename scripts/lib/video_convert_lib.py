@@ -1,7 +1,23 @@
+import os
 import numpy as np
 import subprocess
 import cv2
 import matplotlib.image as mpimg
+
+
+# Convert codec from fourcc to string
+def decode_fourcc(cc):
+    return "".join([chr((int(cc) >> 8 * i) & 0xFF) for i in range(4)])
+
+
+def get_info_cv2(inPathName):
+    capture = cv2.VideoCapture(inPathName)
+    return {
+        'nFrame' : int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
+        'fps'    : capture.get(cv2.CAP_PROP_FPS),
+        'shape'  : (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))),
+        'fourcc' : decode_fourcc(capture.get(cv2.CAP_PROP_FOURCC))
+    }
 
 
 # Convert video from LOSSLESS AVI to MJPG or XVID

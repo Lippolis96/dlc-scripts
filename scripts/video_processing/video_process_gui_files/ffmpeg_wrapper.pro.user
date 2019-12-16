@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.3.1, 2019-10-25T11:18:17. -->
+<!-- Written by QtCreator 4.3.1, 2019-10-28T16:24:08. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -303,8 +303,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">ffmpeg_wrapper</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/media/aleksejs/DataHDD/work/codes/comp-neuro/analysis-tracking/dlc-scripts/scripts/tools/ffmpeg_wrapper_gui/ffmpeg_wrapper/ffmpeg_wrapper.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">ffmpeg_wrapper2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/media/aleksejs/DataHDD/work/codes/comp-neuro/analysis-tracking/dlc-scripts/scripts/video_processing/video_process_gui_files/ffmpeg_wrapper.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">ffmpeg_wrapper.pro</value>
