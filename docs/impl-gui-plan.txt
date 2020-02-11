@@ -1,0 +1,40 @@
+Plan:
+
+A. Marking-local
+  1. Open local project folder
+  2. Open video folder on network folder
+  3. Open existing project - import settings
+  4. Fill in some typical params
+  5. Run prep from dlc
+  6. Auto-edit config-yaml
+  7. Run WS-GUI, mark by hand
+  8. Load marked images directly, check
+  9. Create training set
+
+B. Training-remote
+  1. Enter addr-connect to ssh
+  2. Open projects dir remotely, copy existing project folder
+  3. Open video folder remotely
+  4. Fill in some typical config params
+  5. Auto-edit config2-yaml
+  6. Run training remotely
+  7. Run marking remotely
+  8. Run evaluation remotely, plot statistics
+  9. Copy trained videos and statistics to the network folder
+  10. Close session, ensure GPU tasks closed
+
+C. Marking-remote
+  1. Open projects dir remotely, copy existing project folder
+  2. Open video folder remotely
+  3. Fill in some typical config params
+  4. Auto-edit config2-yaml
+  5. Run marking remotely
+  6. Copy trained videos and statistics to the network folder
+  
+D. Postprocess-local
+  1. Open projects folder on network drive
+  2. Extract positions, lengths and angles
+  3. Report statistics on bad frames (confidence vs bad distances)
+  Optional: iterative-marking
+    4. Filter all bad frames, extract some based on k-means
+    5. Run WS-GUI, mark additional frames by hand

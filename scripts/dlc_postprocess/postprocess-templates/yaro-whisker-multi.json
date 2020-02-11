@@ -1,0 +1,6 @@
+{
+  "NODE_NAMES"       : ["Texture", "Nose", "Whisker1_bottom", "Whisker1_top", "Whisker2_bottom", "Whisker2_top", "Whisker3_bottom", "Whisker3_top", "Touch"],
+  "NODE_MAX_V"       : [200, 200, 200, 200, 200, 200, 200, 200, 200],
+  "LIKELIHOOD_THR"   : 0.01,
+  "STICKMAN_OVERLAY" : true
+}

@@ -1,0 +1,18 @@
+--------------------------
+How to install DLC on Windows
+--------------------------
+1) Install anaconda python 3. Make sure to tick "Add anaconda to environment path"
+  https://www.anaconda.com/distribution/
+2) Download deeplabcut
+  https://github.com/AlexEMG/DeepLabCut
+3) Install deeplabcut environment
+  3.1) Start Anaconda Prompt
+  3.2) Follow instructions at https://github.com/AlexEMG/DeepLabCut/blob/master/conda-environments/README.md
+   3.2.1) use "cd <folder>" to navigate to downloaded deeplabcut folder, then to folder "conda environments"
+   3.2.2) Run conda env create -f dlc-windowsCPU.yaml
+4) Download our code dlc-scripts
+  https://github.com/HelmchenLabSoftware/dlc-scripts
+5) Run our code
+  5.1) Inside anaconda prompt, navigate to dlc-scripts
+  5.2) Activate anaconda environment "conda activate <dlc-windowsCPU>"
+  5.3) Proceed with code-specific documentation
