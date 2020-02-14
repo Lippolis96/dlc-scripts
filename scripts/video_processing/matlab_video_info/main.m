@@ -14,6 +14,7 @@ video_info = table(format, width, height, fps, num_frames, 'RowNames', {file})
 
 %% frames sequence from video interval
 first_frame = 100;
-last_frame = 150;
-frames = frameSequenceFromVideo(fileName, first_frame, last_frame);
-% note: each [n*m*3] matrix is an rgb frame
+last_frame = 102;
+frames = frameSequenceFromVideo(fileName, format, first_frame, last_frame);
+% note: if rgb each [n*m*3] matrix is an rgb frame
+%       if grayscale each [n*m*1] matrix is an rgb frame    

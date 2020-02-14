@@ -1,4 +1,4 @@
-function frames = frameSequenceFromVideo(fileName, first_frame, last_frame)
+function frames = frameSequenceFromVideo(fileName, format, first_frame, last_frame)
 
     video = VideoReader(fileName);
     init_frame = read(video, first_frame);
@@ -8,8 +8,11 @@ function frames = frameSequenceFromVideo(fileName, first_frame, last_frame)
     frames = [];
     while index_frame < last_frame+1
         frame = read(video, index_frame);
-        frames = cat(3, frames, frame);
+        if isequal(format{1}, 'RGB24')
+            frames = cat(3, frames, frame);
+        else % grayscale case
+            frames = cat(3, frames, frame(:,:,1));
+        end
         index_frame = index_frame + 1;
     end
-    
 end
