@@ -5,6 +5,7 @@ import cv2
 import matplotlib.image as mpimg
 
 
+
 # Convert codec from fourcc to string
 def decode_fourcc(cc):
     return "".join([chr((int(cc) >> 8 * i) & 0xFF) for i in range(4)])
@@ -65,9 +66,8 @@ def convert_cv2(inPathName, outPathName, FOURCC='MJPG', crop=None, isColor=False
     
 
 # Convert video from any AVI to any other
-def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, crop=None):    
+def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, crop=None): 
     task = ["ffmpeg","-i", src_name]
-    
     # Determine color
     if gray:
         task += ["-vf", "format=gray"]
@@ -90,7 +90,6 @@ def convert_ffmpeg_h265(src_name, trg_name, lossless=False, crf=22, gray=False, 
         
     # Target must appear at the end of the task
     task += [trg_name]
-    
     # Run
     subprocess.run(task)
 

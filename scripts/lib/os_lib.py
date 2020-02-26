@@ -36,16 +36,23 @@ def get_files(path, ext):
     return [fname for fname in os.listdir(path) if os.path.splitext(fname)[1] == ext]
 
 
+def test_file_size_boundaries(fPathName, fMin, fMax):
+    fileSize = os.path.getsize(fPathName)
+    yesMin = (fMin is None) or (fMin <= fileSize)
+    yesMax = (fMax is None) or (fMax >= fileSize)
+    return yesMax and yesMin
+    
+    
 # Find all files in a given directory including subdirectories
 # All keys must appear in file name
-def getfiles_walk(inputpath, keys=None, min_size=None, max_size=None):
+def getfiles_walk(inputpath, keys=None, minSize=None, maxSize=None):
     rez = []
     for dirpath, dirnames, filenames in os.walk(inputpath):
         for filename in filenames:
+            fPathName = os.path.join(dirpath, filename)
             filterTestsPass = [
                 (keys is None) or np.all([key in filename for key in keys]),
-                (min_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) > min_size),
-                (max_size is None) or (os.path.getsize(os.path.join(dirpath, filename)) < max_size)
+                test_file_size_boundaries(fPathName, minSize, maxSize)
             ]
 
             if np.all(filterTestsPass):

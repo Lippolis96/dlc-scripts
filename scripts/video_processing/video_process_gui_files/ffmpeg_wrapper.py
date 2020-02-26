@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/media/aleksejs/DataHDD/work/codes/comp-neuro/analysis-tracking/dlc-scripts/scripts/video_processing/video_process_gui_files/ffmpeg_wrapper.ui'
+# Form implementation generated from reading ui file 'C:\Users\glippo\Desktop\dlc-scripts\scripts\video_processing\video_process_gui_files\ffmpeg_wrapper.ui'
 #
-# Created by: PyQt5 UI code generator 5.10.1
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -157,7 +157,7 @@ class Ui_FFMPEG_WRAPPER(object):
         FFMPEG_WRAPPER.setStatusBar(self.statusBar)
 
         self.retranslateUi(FFMPEG_WRAPPER)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(FFMPEG_WRAPPER)
 
     def retranslateUi(self, FFMPEG_WRAPPER):
@@ -193,5 +193,5 @@ class Ui_FFMPEG_WRAPPER(object):
         self.mainSourceButton.setText(_translate("FFMPEG_WRAPPER", "Select Source"))
         self.mainTargetButton.setText(_translate("FFMPEG_WRAPPER", "Select Target"))
         self.mainConvertButton.setText(_translate("FFMPEG_WRAPPER", "Convert"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.vidoeCompressTab), _translate("FFMPEG_WRAPPER", "Tab 1"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.vidoeCompressTab), _translate("FFMPEG_WRAPPER", "operations"))
 

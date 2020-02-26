@@ -186,7 +186,7 @@ class CompressGUI():
 if __name__ == '__main__' :
     app = QtWidgets.QApplication(sys.argv)
     mainwindow = QtWidgets.QMainWindow()
-    locale.setlocale(locale.LC_TIME, "en_GB.utf8")
+    #locale.setlocale(locale.LC_TIME, "en_US.utf8")
     pth1 = CompressGUI(mainwindow)
     mainwindow.show()
     sys.exit(app.exec_())
